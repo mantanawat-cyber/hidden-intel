@@ -35,13 +35,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Kanit'
 body{padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(16px,env(safe-area-inset-left,0px))}
 
 /* ── Screens ── */
-.screen{display:none;min-height:100%;padding-block:20px;flex-direction:column;gap:14px}
+.screen{display:none;min-height:100%;padding-block:14px;flex-direction:column;gap:10px}
 .screen.active{display:flex}
 
 /* ── Type ── */
-.title{font-size:1.9rem;font-weight:900;line-height:1.1}
-.subtitle{font-size:.88rem;color:var(--muted)}
-.section-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.title{font-size:1.7rem;font-weight:900;line-height:1.1}
+.subtitle{font-size:.85rem;color:var(--muted)}
+.section-label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 
 /* ── Buttons ── */
 .btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:'Kanit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;letter-spacing:.02em}
@@ -54,8 +54,8 @@ body{padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px
 .btn-stack{display:flex;flex-direction:column;gap:10px}
 
 /* ── Surfaces ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px}
-.input{width:100%;padding:13px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;font-family:'Kanit',sans-serif;font-size:1rem;color:var(--text);outline:none}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px}
+.input{width:100%;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;font-family:'Kanit',sans-serif;font-size:1rem;color:var(--text);outline:none}
 .input:focus{border-color:var(--purple)}
 label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 
@@ -74,9 +74,9 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .player-score{margin-left:auto;font-size:.88rem;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
 
 /* ── PLAYING CARD ── */
-.play-card-wrap{flex-shrink:0;width:86px;perspective:780px}
+.play-card-wrap{flex-shrink:0;width:80px;perspective:720px}
 .play-card-inner{
-  position:relative;width:86px;height:120px;
+  position:relative;width:80px;height:112px;
   transform-style:preserve-3d;
   transition:transform .6s cubic-bezier(.25,.46,.45,.94);
   filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))
@@ -216,14 +216,18 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .card-new.flipped .play-card-inner{animation:card-flip-glow .6s ease-out forwards}
 
 /* ── Hand scroll ── */
-.hand-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.hand-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .hand-scroll::-webkit-scrollbar{display:none}
 .hand-scroll .play-card-wrap{scroll-snap-align:start}
 
+/* ── Deck + hand row ── */
+.deck-hand-row{display:flex;gap:10px;align-items:flex-start}
+.deck-hand-row .hand-scroll{flex:1;min-width:0}
+
 /* ── Deck pile ── */
-.deck-pile{position:relative;width:86px;height:120px;cursor:pointer;flex-shrink:0}
+.deck-pile{position:relative;width:80px;height:112px;cursor:pointer;flex-shrink:0}
 .deck-pile-card{
-  position:absolute;width:86px;height:120px;
+  position:absolute;width:80px;height:112px;
   background:linear-gradient(155deg,#200848,#0e1744,#071633);
   border:2px solid rgba(201,162,39,.5);
   border-radius:14px;
@@ -254,8 +258,11 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .chip-cards{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .chip-elim{opacity:.35;text-decoration:line-through}
 
+/* ── Question box ── */
+.q-box{background:var(--surface);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:10px}
+
 /* ── Turn banner ── */
-.turn-banner{text-align:center;padding:10px;border-radius:12px;font-weight:700;font-size:.88rem}
+.turn-banner{text-align:center;padding:8px 10px;border-radius:10px;font-weight:700;font-size:.82rem}
 .turn-banner.my-turn{background:rgba(124,58,237,.15);color:var(--purple);border:1px solid rgba(124,58,237,.3)}
 .turn-banner.other-turn{background:var(--surface2);color:var(--muted)}
 
@@ -275,9 +282,6 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .choice-btn.correct{background:rgba(22,163,74,.12);border-color:var(--green);color:var(--green)}
 .choice-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red);opacity:.6}
 .choice-btn:disabled{cursor:default}
-
-/* ── Question box ── */
-.q-box{background:var(--surface);border:1px solid rgba(124,58,237,.3);border-radius:14px;padding:14px}
 
 /* ── Score chips ── */
 .pts-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:.78rem;font-weight:700}
@@ -308,10 +312,10 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 <!-- ═══════════════════════════════ SCREENS ═══ -->
 
 <div id="s-home" class="screen active">
-  <div style="padding-top:12px;text-align:center">
-    <div style="font-size:3rem;margin-bottom:8px">🎴</div>
+  <div style="padding-top:6px;text-align:center">
+    <div style="font-size:2.2rem;margin-bottom:6px">🎴</div>
     <div class="title">Hidden Intel</div>
-    <div class="subtitle" style="margin-top:6px">สุ่มการ์ด · รวบข้อมูล · แอบดูเพื่อน · ทายตัวละครอนิเมะ</div>
+    <div class="subtitle" style="margin-top:4px">สุ่มการ์ด · รวบข้อมูล · แอบดูเพื่อน · ทายตัวละครอนิเมะ</div>
   </div>
   <div class="card" style="font-size:.82rem;line-height:1.7;color:var(--muted)">
     <span style="color:var(--text);font-weight:600">วิธีเล่น:</span> แต่ละรอบมีตัวละครให้ทาย · กดสุ่มการ์ดทีละใบ · ใบ 👀 ให้แอบดูข้อมูลเพื่อน · ใครรู้เร็วตอบได้ก่อน
@@ -740,43 +744,35 @@ function renderPlaying() {
       : `<div class="turn-banner other-turn">รอ ${turnPlayerName} เล่น...</div>`;
 
   document.getElementById('playing-content').innerHTML = `
-    <div class="q-box">
-      <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">
-        รอบ ${qIdx+1}/${roomData?.numRounds||numRounds} · ตัวละครนี้คือใคร?
+    <div class="q-box" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div>
+        <div style="font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">
+          รอบ ${qIdx+1}/${roomData?.numRounds||numRounds}
+        </div>
+        <div style="font-size:1rem;font-weight:800;color:var(--text);margin-top:1px">🎴 ทายตัวละครอนิเมะ</div>
       </div>
-      <div style="font-size:1.1rem;font-weight:800;color:var(--text)">🎴 ทาย&shy;ตัว&shy;ละ&shy;คร</div>
-    </div>
-    <div>
-      <div class="section-label">ผู้เล่นในวง</div>
-      <div class="other-players">${othersHtml}</div>
+      <div class="other-players" style="flex-shrink:0">${othersHtml}</div>
     </div>
     ${turnHtml}
     <div>
-      <div class="section-label">การ์ดในมือคุณ (${myHand.length} ใบ)</div>
-      ${myHand.length > 0
-        ? `<div class="hand-scroll">${handHtml}</div>`
-        : `<div style="font-size:.82rem;color:var(--muted);padding:4px 0">ยังไม่มีการ์ด — กดสุ่มเพื่อเปิดใบแรก</div>`}
-    </div>
-    <div>
-      <div class="section-label">กองการ์ดของคุณ</div>
-      <div style="display:flex;align-items:center;gap:12px">
+      <div class="section-label">การ์ดในมือ (${myHand.length} ใบ) · กองเหลือ ${remaining}</div>
+      <div class="deck-hand-row">
         ${deckHtml}
-        <div style="font-size:.8rem;color:var(--muted);line-height:1.6">
-          ${myTurn&&!myElim?'<span style="color:var(--purple);font-weight:600">กดกองการ์ด</span>เพื่อสุ่ม':''}
-          ${remaining===0?'ใบหมดแล้ว':''}
-        </div>
+        ${myHand.length > 0
+          ? `<div class="hand-scroll">${handHtml}</div>`
+          : `<div style="font-size:.8rem;color:var(--muted);padding:4px 0;align-self:center">${myTurn&&!myElim?'<span style="color:var(--purple);font-weight:600">กดกองการ์ด</span>เพื่อสุ่มใบแรก':'รอเทิร์น...'}</div>`}
       </div>
     </div>
     <div class="play-action-bar">
       <div class="action-row">
         ${canSpy&&myTurn&&!myElim
-          ? `<button class="btn btn-purple" onclick="openSpyModal()">👀 แอบดูเพื่อน</button>`
-          : `<button class="btn btn-ghost" disabled style="opacity:.3">👀 แอบดู${!hasSpyCard?'(ไม่มีการ์ด)':!myTurn?'(รอเทิร์น)':''}</button>`}
+          ? `<button class="btn btn-purple" onclick="openSpyModal()">👀 แอบดู</button>`
+          : `<button class="btn btn-ghost" disabled style="opacity:.3">👀 แอบดู</button>`}
         <button class="btn btn-gold" onclick="openAnswerModal()" ${myElim?'disabled style="opacity:.3"':''}>
-          🎯 ตอบ! ${drawnCount>0?`(${drawnCount}ใบ)`:''}
+          🎯 ตอบ!${drawnCount>0?` (${drawnCount}ใบ)`:''}
         </button>
       </div>
-      ${isHost?`<button class="btn btn-ghost" style="font-size:.78rem;padding:9px;opacity:.4;margin-top:8px" onclick="hostSkipRound()">⏭ ข้ามรอบ (Host)</button>`:''}
+      ${isHost?`<button class="btn btn-ghost" style="font-size:.75rem;padding:8px;opacity:.35;margin-top:6px" onclick="hostSkipRound()">⏭ ข้ามรอบ (Host)</button>`:''}
     </div>
   `;
 }
