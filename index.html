@@ -198,7 +198,7 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .type-hard  .card-type-label{background:rgba(220,38,38,.18);color:#f87171}
 .type-spy   .card-type-label{background:rgba(124,58,237,.22);color:#a78bfa}
 .card-label{font-size:.62rem;color:var(--muted);margin-top:4px;font-weight:600;letter-spacing:.03em}
-.card-text{font-size:.72rem;line-height:1.4;color:var(--text);margin-top:2px;flex:1;overflow:hidden}
+.card-text{font-size:.72rem;line-height:1.45;color:var(--text);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical}
 
 /* New card deal animation */
 @keyframes card-deal{
@@ -210,9 +210,9 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 
 /* ── Hand card (front face, always visible) ── */
 .hand-card-wrap{
-  flex-shrink:0;width:80px;height:112px;border-radius:14px;border:2px solid;
+  flex-shrink:0;width:90px;min-height:126px;border-radius:14px;border:2px solid;
   overflow:hidden;display:flex;flex-direction:column;cursor:default;
-  scroll-snap-align:start;
+  scroll-snap-align:start;position:relative;
 }
 .hand-card-wrap::before{content:'';display:block;height:4px;flex-shrink:0;width:100%}
 .hand-card-wrap.type-easy  {background:linear-gradient(160deg,rgba(22,163,74,.18),rgba(22,163,74,.07));border-color:rgba(22,163,74,.55)}
@@ -223,6 +223,38 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .hand-card-wrap.type-medium::before{background:linear-gradient(90deg,#d97706,#fbbf24)}
 .hand-card-wrap.type-hard::before  {background:linear-gradient(90deg,#dc2626,#f87171)}
 .hand-card-wrap.type-spy::before   {background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+/* flip overlay — covers front face, animates away to reveal card info */
+.card-flip-back{
+  position:absolute;inset:0;border-radius:12px;z-index:5;
+  background:linear-gradient(155deg,#200848,#0e1744);
+  display:flex;align-items:center;justify-content:center;
+  transform-origin:left center;
+  animation:flip-back-out .42s .08s cubic-bezier(.4,0,.6,1) forwards
+}
+@keyframes flip-back-out{
+  0%  {transform:scaleX(1);opacity:1}
+  44% {transform:scaleX(0);opacity:1}
+  52% {transform:scaleX(0);opacity:0}
+  100%{transform:scaleX(0);opacity:0;visibility:hidden}
+}
+/* spy pick grid */
+.spy-cards-row{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:12px}
+.spy-pick-card{
+  width:60px;height:84px;border-radius:10px;
+  background:linear-gradient(155deg,#200848,#0e1744);
+  border:1.5px solid rgba(201,162,39,.4);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.3rem;
+  transition:border-color .12s,transform .1s,opacity .15s
+}
+.spy-pick-card:active:not(.picked):not(.dimmed){transform:scale(.94)}
+.spy-pick-card.picked{border-color:var(--purple);box-shadow:0 0 10px rgba(124,58,237,.4);cursor:default}
+.spy-pick-card.dimmed{opacity:.18;cursor:default}
+.spy-info-panel{
+  background:var(--surface2);border:1.5px solid rgba(124,58,237,.4);
+  border-radius:12px;padding:12px;
+  animation:card-deal .3s cubic-bezier(.22,1,.36,1)
+}
 
 /* ── Hand scroll ── */
 .hand-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
@@ -447,10 +479,10 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 <div class="modal-bg hidden" id="m-spy-result">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div style="font-weight:700;font-size:1rem;text-align:center;margin-bottom:12px">🕵️ สิ่งที่คุณเห็น</div>
-    <div class="spy-reveal-card" id="spy-result-content"></div>
-    <div class="subtitle" style="text-align:center;margin-top:10px;font-size:.75rem">เพื่อนไม่รู้ว่าคุณเห็นสิ่งนี้</div>
-    <button class="btn btn-purple" style="margin-top:16px" onclick="closeModal('m-spy-result');advanceTurn()">รับทราบ</button>
+    <div style="font-weight:700;font-size:1rem;text-align:center;margin-bottom:12px">🕵️ เลือกการ์ดที่อยากดู</div>
+    <div id="spy-result-content"></div>
+    <div class="subtitle" style="text-align:center;margin-top:8px;font-size:.75rem">เพื่อนไม่รู้ว่าคุณแอบดู 🤫</div>
+    <button class="btn btn-purple" style="margin-top:14px" onclick="closeModal('m-spy-result');advanceTurn()">รับทราบ ▶</button>
   </div>
 </div>
 
@@ -493,9 +525,10 @@ let roomRef   = null;
 let roomData  = null;
 let isHost    = false;
 let numRounds = 3;
-let myDeck    = [];
-let myHand    = [];
+let myDeck      = [];
+let myHand      = [];
 let spyCardUsed = false;
+let _newCardIdx = -1;
 
 const AVATARS   = ['🦊','🐼','🐯','🐸','🐺','🦁','🐧','🦋','🐙','🦄'];
 const AV_COLORS = ['#2d1b4e','#1b2d4e','#1b4e2d','#4e2d1b','#4e1b2d','#2d4e1b','#1b4e4e','#4e4e1b','#1b1b4e','#4e1b4e'];
@@ -734,6 +767,7 @@ function initRoundClient() {
     myHand = [];
   }
   spyCardUsed = false;
+  _newCardIdx = -1;
   renderPlaying();
 }
 
@@ -765,9 +799,10 @@ function renderPlaying() {
     </div>`;
   }).join('');
 
-  // My hand cards — rendered directly as front face (no 3D flip needed)
+  // My hand cards — front face with flip-back overlay for newly drawn card
   const handHtml = myHand.map((card,i)=>`
-    <div class="hand-card-wrap type-${card.type} ${i===myHand.length-1?'card-new':''}" id="hcard-${i}">
+    <div class="hand-card-wrap type-${card.type}${i===_newCardIdx?' card-new':''}" id="hcard-${i}">
+      ${i===_newCardIdx?`<div class="card-flip-back"><span style="font-size:1.1rem;opacity:.35;color:rgba(201,162,39,.7)">⟡</span></div>`:''}
       <div class="card-inner-content">
         <div class="card-type-label">${card.type==='spy'?'👀 SPY':card.type.toUpperCase()}</div>
         <div class="card-label">${card.label}</div>
@@ -857,6 +892,7 @@ function drawCard() {
   const card     = q.cards[cardIdx];
 
   myHand.push(card);
+  _newCardIdx = myHand.length - 1;
 
   const newCount = (cr.drawnCounts?.[myUid]||0) + 1;
   roomRef.child('currentRound/drawnCounts/'+myUid).set(newCount);
@@ -898,40 +934,58 @@ function executeSpy(targetUid) {
   const target = roomData?.players?.[targetUid];
   if (!cr || !target) return;
 
-  // Get target's drawn count → pick one of their drawn cards
   const drawn = cr.drawnCounts?.[targetUid] || 0;
   if (drawn === 0) {
     document.getElementById('spy-result-content').innerHTML = `
-      <div style="font-size:1.5rem">🤷</div>
-      <div style="margin-top:8px;font-weight:600">${target.name} ยังไม่มีการ์ดในมือเลย</div>`;
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:1.5rem">🤷</div>
+        <div style="margin-top:8px;font-weight:600">${esc(target.name)} ยังไม่มีการ์ดในมือเลย</div>
+      </div>`;
     document.getElementById('m-spy-result').classList.remove('hidden');
-    // Remove spy card from hand
-    removeSpyCard();
+    removeSpyCard(); spyCardUsed = true;
     return;
   }
 
-  // Peek at a random drawn card of target
-  // We use target's deck order from Firebase + how many they drew
-  const targetDeck  = cr.decks?.[targetUid] || [];
-  const drawnIdxs   = targetDeck.slice(0, drawn);
-  const peekCardIdx = drawnIdxs[Math.floor(Math.random() * drawnIdxs.length)];
-  const qId  = (roomData.questionOrder||[])[roomData.currentQNum||0];
-  const q    = allQ.find(x=>x.id===qId);
-  const card = q?.cards[peekCardIdx];
-  if (!card) return;
+  const targetDeck = cr.decks?.[targetUid] || [];
+  const drawnIdxs  = targetDeck.slice(0, drawn);
 
-  // Show result
+  const cardsHtml = drawnIdxs.map((cardIdx, i)=>`
+    <div class="spy-pick-card" data-cidx="${cardIdx}" data-pos="${i}" onclick="spyRevealCard(this)">
+      <span style="opacity:.35;color:rgba(201,162,39,.7)">⟡</span>
+    </div>`).join('');
+
   document.getElementById('spy-result-content').innerHTML = `
-    <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px">การ์ดของ ${target.avatar} ${esc(target.name)}</div>
-    <div class="card-type-label" style="margin:0 auto 8px;background:rgba(124,58,237,.2);color:var(--c-spy)">
+    <div style="font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:10px">
+      ${target.avatar} <strong>${esc(target.name)}</strong> มี ${drawn} ใบ · แตะเพื่อดู
+    </div>
+    <div class="spy-cards-row" id="spy-cards-row">${cardsHtml}</div>
+    <div id="spy-info-panel" style="display:none"></div>`;
+  document.getElementById('m-spy-result').classList.remove('hidden');
+  removeSpyCard(); spyCardUsed = true;
+}
+
+function spyRevealCard(el) {
+  const cardIdx = parseInt(el.dataset.cidx);
+  const qId = (roomData?.questionOrder||[])[roomData?.currentQNum||0];
+  const q   = allQ.find(x=>x.id===qId);
+  if (!q) return;
+  const card = q.cards[cardIdx];
+
+  document.querySelectorAll('#spy-cards-row .spy-pick-card').forEach(c=>{
+    c.classList.toggle('picked', c===el);
+    c.classList.toggle('dimmed', c!==el);
+    c.onclick = null;
+  });
+
+  const panel = document.getElementById('spy-info-panel');
+  if (!panel) return;
+  panel.style.display = 'block';
+  panel.className = 'spy-info-panel';
+  panel.innerHTML = `
+    <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--c-${card.type});margin-bottom:5px">
       ${card.type.toUpperCase()} · ${card.label}
     </div>
-    <div style="font-size:1rem;font-weight:600;line-height:1.5">${card.text}</div>`;
-  document.getElementById('m-spy-result').classList.remove('hidden');
-
-  // Remove spy card from hand
-  removeSpyCard();
-  spyCardUsed = true;
+    <div style="font-size:.9rem;line-height:1.5;color:var(--text)">${card.text}</div>`;
 }
 
 function removeSpyCard() {
@@ -1006,6 +1060,7 @@ function passTurn() {
 
 // ════════════════════════════════════ ADVANCE TURN ════
 function advanceTurn() {
+  _newCardIdx = -1;
   const cr = roomData?.currentRound;
   if (!isHost && cr?.currentTurn !== myUid) return;
   const tOrder  = roomData?.turnOrder || [];
