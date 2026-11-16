@@ -478,7 +478,26 @@ const AV_COLORS = ['#2d1b4e','#1b2d4e','#1b4e2d','#4e2d1b','#4e1b2d','#2d4e1b','
 async function init() {
   try { allQ = await fetch('./questions.json').then(r=>r.json()); } catch(e) { console.error(e); }
   buildAvGrid('join-av-grid');
-  auth.signInAnonymously().then(u => { myUid = u.user.uid; });
+  auth.signInAnonymously()
+    .then(u => { myUid = u.user.uid; })
+    .catch(err => {
+      console.error('Auth error:', err);
+      showToast('❌ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — ลองรีเฟรชหน้า');
+    });
+}
+
+function showToast(msg) {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1e1e2e;color:#e8ecf5;padding:10px 18px;border-radius:999px;font-size:.85rem;font-weight:600;z-index:999;border:1px solid rgba(255,255,255,.12);white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => { t.style.opacity = '0'; }, 3500);
 }
 
 function buildAvGrid(gridId) {
@@ -525,7 +544,19 @@ function genCode() {
 }
 
 async function initCreateRoom() {
-  if (!myUid) { setTimeout(initCreateRoom,400); return; }
+  if (!myUid) {
+    // รอสูงสุด 8 วินาที
+    if (!initCreateRoom._tries) initCreateRoom._tries = 0;
+    initCreateRoom._tries++;
+    if (initCreateRoom._tries > 20) {
+      initCreateRoom._tries = 0;
+      showToast('❌ เชื่อมต่อไม่ได้ — ลองรีเฟรชหน้า');
+      return;
+    }
+    setTimeout(initCreateRoom, 400);
+    return;
+  }
+  initCreateRoom._tries = 0;
   isHost  = true;
   myName  = 'Host';
   roomId  = genCode();
