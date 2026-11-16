@@ -1,5 +1,9 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hidden Intel</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&display=swap">
 <style>
 /* ── Tokens ── */
@@ -290,7 +294,16 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 
 /* ── Spy reveal ── */
 .spy-reveal-card{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1.5px solid rgba(124,58,237,.4);border-radius:16px;padding:20px;text-align:center}
+
+/* ── Sticky action bar ── */
+.play-action-bar{
+  position:sticky;bottom:0;
+  padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to bottom,transparent,var(--bg) 30%);
+}
 </style>
+</head>
+<body>
 
 <!-- ═══════════════════════════════ SCREENS ═══ -->
 
@@ -754,15 +767,17 @@ function renderPlaying() {
         </div>
       </div>
     </div>
-    <div class="action-row">
-      ${canSpy&&myTurn&&!myElim
-        ? `<button class="btn btn-purple" onclick="openSpyModal()">👀 แอบดูเพื่อน</button>`
-        : `<button class="btn btn-ghost" disabled style="opacity:.3">👀 แอบดู${!hasSpyCard?'(ไม่มีการ์ด)':!myTurn?'(รอเทิร์น)':''}</button>`}
-      <button class="btn btn-gold" onclick="openAnswerModal()" ${myElim?'disabled style="opacity:.3"':''}>
-        🎯 ตอบ! ${drawnCount>0?`(${drawnCount}ใบ)`:''}
-      </button>
+    <div class="play-action-bar">
+      <div class="action-row">
+        ${canSpy&&myTurn&&!myElim
+          ? `<button class="btn btn-purple" onclick="openSpyModal()">👀 แอบดูเพื่อน</button>`
+          : `<button class="btn btn-ghost" disabled style="opacity:.3">👀 แอบดู${!hasSpyCard?'(ไม่มีการ์ด)':!myTurn?'(รอเทิร์น)':''}</button>`}
+        <button class="btn btn-gold" onclick="openAnswerModal()" ${myElim?'disabled style="opacity:.3"':''}>
+          🎯 ตอบ! ${drawnCount>0?`(${drawnCount}ใบ)`:''}
+        </button>
+      </div>
+      ${isHost?`<button class="btn btn-ghost" style="font-size:.78rem;padding:9px;opacity:.4;margin-top:8px" onclick="hostSkipRound()">⏭ ข้ามรอบ (Host)</button>`:''}
     </div>
-    ${isHost?`<button class="btn btn-ghost" style="font-size:.78rem;padding:9px;opacity:.4;margin-top:-4px" onclick="hostSkipRound()">⏭ ข้ามรอบ (Host)</button>`:''}
   `;
 }
 
@@ -1058,3 +1073,5 @@ document.querySelectorAll('.modal-bg').forEach(bg=>{
 
 init();
 </script>
+</body>
+</html>
