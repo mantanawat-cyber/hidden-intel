@@ -1232,6 +1232,7 @@ let soloDeck      = [];
 let soloHand      = [];
 let soloElim      = false;
 let _soloNewIdx   = -1;
+let _soloToken    = 0;  // invalidates stale submitSoloAnswer timeouts
 
 function selectSoloRounds(n, el) {
   soloNumRounds = n;
@@ -1246,6 +1247,7 @@ function startSolo() {
 }
 
 function startSoloRound() {
+  _soloToken++;  // cancel any stale answer timeouts from previous round
   soloDeck = shuffle([0,1,2,3,4,5,6,7]);  // 8 info cards, no spy
   soloHand = []; soloElim = false; _soloNewIdx = -1;
   renderSoloPlay();
@@ -1329,23 +1331,24 @@ function openSoloAnswerModal() {
   if (!q) return;
   const wrong = shuffle(allQ.filter(x=>x.id!==q.id)).slice(0,3).map(x=>x.answer);
   const opts  = shuffle([q.answer, ...wrong]);
-  document.getElementById('answer-choices').innerHTML = opts.map(opt=>`
-    <button class="choice-btn" onclick="submitSoloAnswer('${opt.replace(/'/g,"\\'")}','${q.answer.replace(/'/g,"\\'")}')">
+  const correctIdx = opts.indexOf(q.answer);
+  const tok = _soloToken;
+  document.getElementById('answer-choices').innerHTML = opts.map((opt, i)=>`
+    <button class="choice-btn" onclick="submitSoloAnswer(${i},${correctIdx},${tok})">
       ${opt}
     </button>`).join('');
   document.getElementById('m-answer').classList.remove('hidden');
 }
 
-function submitSoloAnswer(selected, correct) {
-  document.querySelectorAll('#answer-choices .choice-btn').forEach(btn=>{
-    btn.disabled = true;
-    const txt = btn.textContent.trim();
-    if (txt === selected) btn.classList.add(selected===correct?'correct':'wrong');
-    if (txt === correct && selected !== correct) btn.classList.add('correct');
-  });
+function submitSoloAnswer(selectedIdx, correctIdx, tok) {
+  const btns = [...document.querySelectorAll('#answer-choices .choice-btn')];
+  btns.forEach(b => b.disabled = true);
+  btns[selectedIdx]?.classList.add(selectedIdx===correctIdx?'correct':'wrong');
+  if (selectedIdx !== correctIdx) btns[correctIdx]?.classList.add('correct');
   setTimeout(()=>{
+    if (tok !== _soloToken) return;  // stale callback — new round already started
     closeModal('m-answer');
-    if (selected === correct) {
+    if (selectedIdx === correctIdx) {
       const pts = soloHand.length <= 2 ? 3 : soloHand.length <= 4 ? 2 : 1;
       soloScore += pts;
       showSoloReveal(pts);
