@@ -606,6 +606,7 @@ function joinRoom() {
   const err  = document.getElementById('join-err');
   if (!code||code.length<4) { err.textContent='ใส่รหัสห้องให้ครบ'; return; }
   if (!name) { err.textContent='ใส่ชื่อก่อน'; return; }
+  if (!myUid) { err.textContent='กำลังเชื่อมต่อ... ลองอีกครั้ง'; return; }
   err.textContent = '';
   myName = name; isHost = false; roomId = code;
   roomRef = db.ref('ci_rooms/'+roomId);
