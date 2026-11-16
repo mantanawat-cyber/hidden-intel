@@ -809,8 +809,8 @@ function renderPlaying() {
   const turnHtml = myElim
     ? `<div class="turn-banner other-turn">❌ คุณตอบผิดในรอบนี้ — ดูคนอื่นเล่นต่อ</div>`
     : myTurn
-      ? `<div class="turn-banner my-turn">⭐ เทิร์นของคุณ — สุ่มการ์ดหรือตอบได้เลย</div>`
-      : `<div class="turn-banner other-turn">รอ ${turnPlayerName} เล่น...</div>`;
+      ? `<div class="turn-banner my-turn">⭐ เทิร์นของคุณ — ${remaining>0?'กดสุ่ม 1 ใบ':'กองหมดแล้ว'} หรือตอบได้เลย</div>`
+      : `<div class="turn-banner other-turn">รอ ${esc(turnPlayerName)} สุ่มการ์ด...</div>`;
 
   document.getElementById('playing-content').innerHTML = `
     <div class="q-box" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -838,11 +838,11 @@ function renderPlaying() {
           ? `<button class="btn btn-purple" onclick="openSpyModal()">👀 แอบดู</button>`
           : `<button class="btn btn-ghost" disabled style="opacity:.3">👀 แอบดู</button>`}
         <button class="btn btn-gold" onclick="openAnswerModal()" ${myElim?'disabled style="opacity:.3"':''}>
-          🎯 ตอบ!${drawnCount>0?` (${drawnCount}ใบ)`:''}
+          🎯 ตอบ!
         </button>
       </div>
-      ${myTurn&&!myElim&&drawnCount>0
-        ? `<button class="btn btn-ghost" style="margin-top:8px;font-size:.88rem" onclick="passTurn()">⏩ ผ่านเทิร์น</button>`
+      ${myTurn&&!myElim&&remaining===0
+        ? `<button class="btn btn-ghost" style="margin-top:8px;font-size:.88rem" onclick="passTurn()">⏩ ข้ามเทิร์น (กองหมด)</button>`
         : ''}
       ${isHost?`<button class="btn btn-ghost" style="font-size:.75rem;padding:8px;opacity:.35;margin-top:6px" onclick="hostSkipRound()">⏭ ข้ามรอบ (Host)</button>`:''}
     </div>
@@ -861,14 +861,11 @@ function drawCard() {
   if (!q) return;
   const card     = q.cards[cardIdx];
 
-  // Add to hand
   myHand.push(card);
 
-  // Update Firebase drawn count
   const newCount = (cr.drawnCounts?.[myUid]||0) + 1;
   roomRef.child('currentRound/drawnCounts/'+myUid).set(newCount);
 
-  // If spy card: auto-use prompt (or just add to hand)
   renderPlaying();
 
   // Animate new card
@@ -877,11 +874,16 @@ function drawCard() {
   if (cardEl) {
     cardEl.classList.remove('flipped');
     cardEl.classList.add('card-new');
-    // Scroll to new card
     const scroll = cardEl.closest('.hand-scroll');
     if (scroll) scroll.scrollLeft = scroll.scrollWidth;
-    // Flip after short delay
     setTimeout(()=>{ cardEl.classList.add('flipped'); }, 350);
+  }
+
+  // Auto-advance turn after drawing: spy card → show modal first; otherwise advance directly
+  if (card.type === 'spy') {
+    setTimeout(()=>{ openSpyModal(); }, 500);
+  } else {
+    setTimeout(()=>{ advanceTurn(); }, 650);
   }
 }
 
