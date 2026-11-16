@@ -1,0 +1,1060 @@
+<title>Hidden Intel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&display=swap">
+<style>
+/* ── Tokens ── */
+:root {
+  --bg:       #07090f;
+  --surface:  #0f1420;
+  --surface2: #171f30;
+  --border:   rgba(255,255,255,.07);
+  --text:     #e8ecf5;
+  --muted:    #6b7a99;
+  --purple:   #7c3aed;
+  --gold:     #c9a227;
+  --green:    #16a34a;
+  --amber:    #d97706;
+  --red:      #dc2626;
+  --blue:     #2563eb;
+  /* card colors */
+  --c-easy:   #16a34a;
+  --c-medium: #d97706;
+  --c-hard:   #dc2626;
+  --c-spy:    #7c3aed;
+  /* card back */
+  --cb-from:  #1e0845;
+  --cb-to:    #0a1535;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Kanit',sans-serif;font-size:15px;overflow-x:hidden}
+body{padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(16px,env(safe-area-inset-left,0px))}
+
+/* ── Screens ── */
+.screen{display:none;min-height:100%;padding-block:20px;flex-direction:column;gap:14px}
+.screen.active{display:flex}
+
+/* ── Type ── */
+.title{font-size:1.9rem;font-weight:900;line-height:1.1}
+.subtitle{font-size:.88rem;color:var(--muted)}
+.section-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+
+/* ── Buttons ── */
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:'Kanit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;letter-spacing:.02em}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-purple{background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;box-shadow:0 4px 20px rgba(124,58,237,.3)}
+.btn-gold{background:linear-gradient(135deg,#c9a227,#a07c10);color:#000}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-green{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff}
+.btn-sm{padding:10px 16px;font-size:.85rem;border-radius:10px;width:auto}
+.btn-stack{display:flex;flex-direction:column;gap:10px}
+
+/* ── Surfaces ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px}
+.input{width:100%;padding:13px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;font-family:'Kanit',sans-serif;font-size:1rem;color:var(--text);outline:none}
+.input:focus{border-color:var(--purple)}
+label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
+
+/* ── Avatar ── */
+.avatar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.av-opt{aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;border:2px solid transparent;transition:border-color .15s,transform .1s;background:var(--surface2)}
+.av-opt.selected{border-color:var(--purple);transform:scale(1.08)}
+.av-sm{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+
+/* ── Room code ── */
+.room-code{font-size:2.6rem;font-weight:900;letter-spacing:.14em;text-align:center;color:var(--gold)}
+
+/* ── Player row ── */
+.player-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:12px}
+.player-name{font-weight:600;font-size:.9rem}
+.player-score{margin-left:auto;font-size:.88rem;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+
+/* ── PLAYING CARD ── */
+.play-card-wrap{flex-shrink:0;width:86px;perspective:780px}
+.play-card-inner{
+  position:relative;width:86px;height:120px;
+  transform-style:preserve-3d;
+  transition:transform .6s cubic-bezier(.25,.46,.45,.94);
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))
+}
+.play-card-wrap.flipped .play-card-inner{transform:rotateY(180deg);filter:drop-shadow(0 8px 22px rgba(0,0,0,.45))}
+.play-card-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;overflow:hidden}
+
+/* Card BACK — premium dark */
+.play-card-back-face{
+  background:
+    radial-gradient(ellipse at 38% 32%,rgba(124,58,237,.2) 0%,transparent 55%),
+    radial-gradient(ellipse at 68% 72%,rgba(201,162,39,.08) 0%,transparent 48%),
+    linear-gradient(158deg,#1e064a 0%,#0d0e32 46%,#07091c 100%);
+  border:2px solid rgba(201,162,39,.75);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0
+}
+/* Fine crosshatch texture */
+.play-card-back-face::before{
+  content:'';position:absolute;inset:0;border-radius:12px;
+  background:
+    repeating-linear-gradient(0deg,transparent 0,transparent 11px,rgba(201,162,39,.017) 11px,rgba(201,162,39,.017) 12px),
+    repeating-linear-gradient(90deg,transparent 0,transparent 11px,rgba(201,162,39,.017) 11px,rgba(201,162,39,.017) 12px);
+  pointer-events:none;z-index:0
+}
+/* Inner ornamental frame */
+.play-card-back-face::after{
+  content:'';position:absolute;inset:8px;
+  border:1px solid rgba(201,162,39,.26);border-radius:7px;
+  pointer-events:none;z-index:0
+}
+/* Corner ornaments */
+.pcc{position:absolute;font-size:.48rem;line-height:1;color:rgba(201,162,39,.5);z-index:3;user-select:none}
+.pcc-tl{top:8px;left:9px}
+.pcc-tr{top:8px;right:9px}
+.pcc-bl{bottom:8px;left:9px}
+.pcc-br{bottom:8px;right:9px}
+/* Emblem wrap */
+.pce-wrap{position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;z-index:2;flex-shrink:0}
+/* Spinning rings */
+.pce-spin{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(201,162,39,.22);animation:pce-spin 28s linear infinite}
+.pce-spin2{position:absolute;inset:7px;border-radius:50%;border:1px dashed rgba(201,162,39,.13);animation:pce-spin 20s linear infinite reverse}
+@keyframes pce-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.pce-spin,.pce-spin2{animation:none}}
+/* Main emblem: concentric rings via box-shadow */
+.pce{
+  width:38px;height:38px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,162,39,.28) 0%,rgba(124,58,237,.12) 42%,transparent 68%);
+  box-shadow:
+    0 0 0 1.5px rgba(201,162,39,.7),
+    0 0 0 4px   rgba(201,162,39,.07),
+    0 0 0 5px   rgba(201,162,39,.4),
+    0 0 0 8px   rgba(201,162,39,.04),
+    0 0 0 9.5px rgba(201,162,39,.2),
+    0 0 18px rgba(124,58,237,.6);
+  display:flex;align-items:center;justify-content:center;position:relative
+}
+/* Diamond inscribed in circle */
+.pce::before{
+  content:'';position:absolute;width:20px;height:20px;transform:rotate(45deg);
+  border:1.5px solid rgba(201,162,39,.48);
+  background:linear-gradient(135deg,rgba(201,162,39,.14) 0%,rgba(124,58,237,.1) 100%)
+}
+/* Glyph */
+.pce-glyph{
+  font-size:1.1rem;color:rgba(201,162,39,.92);position:relative;z-index:1;line-height:1;
+  text-shadow:0 0 8px rgba(201,162,39,.7),0 0 20px rgba(124,58,237,.65)
+}
+/* Card name bottom */
+.pce-name{
+  font-size:.38rem;letter-spacing:.28em;color:rgba(201,162,39,.32);
+  text-transform:uppercase;position:relative;z-index:3;margin-top:10px;text-align:center
+}
+/* Shimmer sweep */
+.pce-shimmer{
+  position:absolute;inset:0;z-index:4;border-radius:12px;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.04) 50%,transparent 65%);
+  animation:pce-shim 7s ease-in-out 2s infinite;pointer-events:none
+}
+@keyframes pce-shim{0%{transform:translateX(-140%)}100%{transform:translateX(240%)}}
+
+/* Card FRONT — type-specific */
+.play-card-front-face{
+  transform:rotateY(180deg);
+  display:flex;flex-direction:column;padding:0;
+  border:2px solid;overflow:hidden
+}
+.play-card-front-face.type-easy{
+  background:linear-gradient(160deg,rgba(22,163,74,.18) 0%,rgba(22,163,74,.07) 100%);
+  border-color:rgba(22,163,74,.55)
+}
+.play-card-front-face.type-medium{
+  background:linear-gradient(160deg,rgba(217,119,6,.16) 0%,rgba(217,119,6,.06) 100%);
+  border-color:rgba(217,119,6,.5)
+}
+.play-card-front-face.type-hard{
+  background:linear-gradient(160deg,rgba(220,38,38,.16) 0%,rgba(220,38,38,.06) 100%);
+  border-color:rgba(220,38,38,.5)
+}
+.play-card-front-face.type-spy{
+  background:linear-gradient(160deg,rgba(124,58,237,.2) 0%,rgba(124,58,237,.07) 100%);
+  border-color:rgba(124,58,237,.6)
+}
+/* Type color stripe at top */
+.play-card-front-face::before{
+  content:'';display:block;height:4px;flex-shrink:0;width:100%
+}
+.type-easy::before  {background:linear-gradient(90deg,#16a34a,#4ade80)}
+.type-medium::before{background:linear-gradient(90deg,#d97706,#fbbf24)}
+.type-hard::before  {background:linear-gradient(90deg,#dc2626,#f87171)}
+.type-spy::before   {background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.card-inner-content{display:flex;flex-direction:column;padding:7px 8px 8px;flex:1;overflow:hidden}
+.card-type-label{
+  font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  padding:2px 6px;border-radius:4px;width:fit-content;line-height:1.4
+}
+.type-easy  .card-type-label{background:rgba(22,163,74,.22);color:#4ade80}
+.type-medium .card-type-label{background:rgba(217,119,6,.18);color:#fbbf24}
+.type-hard  .card-type-label{background:rgba(220,38,38,.18);color:#f87171}
+.type-spy   .card-type-label{background:rgba(124,58,237,.22);color:#a78bfa}
+.card-label{font-size:.6rem;color:var(--muted);margin-top:5px;font-weight:600;letter-spacing:.03em}
+.card-text{font-size:.68rem;line-height:1.45;color:var(--text);margin-top:3px;flex:1;overflow:hidden}
+
+/* New card deal animation */
+@keyframes card-deal{
+  0%  {opacity:0;transform:translateY(-50px) translateX(10px) rotateY(-30deg) scale(.75)}
+  55% {opacity:1;transform:translateY(3px) translateX(0) rotateY(-6deg) scale(1.03)}
+  75% {transform:translateY(-2px) rotateY(3deg) scale(1.01)}
+  100%{transform:translateY(0) rotateY(0deg) scale(1)}
+}
+@keyframes card-flip-glow{
+  0%  {filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
+  40% {filter:drop-shadow(0 8px 24px rgba(124,58,237,.5))}
+  100%{filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))}
+}
+.card-new{animation:card-deal .45s cubic-bezier(.22,1,.36,1) forwards}
+.card-new.flipped .play-card-inner{animation:card-flip-glow .6s ease-out forwards}
+
+/* ── Hand scroll ── */
+.hand-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.hand-scroll::-webkit-scrollbar{display:none}
+.hand-scroll .play-card-wrap{scroll-snap-align:start}
+
+/* ── Deck pile ── */
+.deck-pile{position:relative;width:86px;height:120px;cursor:pointer;flex-shrink:0}
+.deck-pile-card{
+  position:absolute;width:86px;height:120px;
+  background:linear-gradient(155deg,#200848,#0e1744,#071633);
+  border:2px solid rgba(201,162,39,.5);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(0,0,0,.5)
+}
+.deck-pile-card::before{content:'';position:absolute;inset:7px;border:1px solid rgba(201,162,39,.2);border-radius:8px}
+.deck-pile-card:nth-child(1){transform:rotate(-3deg) translate(3px,6px);opacity:.35}
+.deck-pile-card:nth-child(2){transform:rotate(1.5deg) translate(-1px,3px);opacity:.6}
+.deck-pile-card:nth-child(3){transform:rotate(0deg);box-shadow:0 6px 24px rgba(0,0,0,.6),0 0 0 1px rgba(201,162,39,.08)}
+.deck-pile-glyph{font-size:2rem;opacity:.5;filter:drop-shadow(0 0 8px rgba(201,162,39,.4));position:relative;z-index:1}
+.deck-count-badge{
+  position:absolute;top:-9px;right:-9px;width:24px;height:24px;
+  border-radius:50%;background:var(--purple);color:#fff;
+  font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  z-index:10;box-shadow:0 2px 8px rgba(124,58,237,.5)
+}
+@keyframes deck-pulse{
+  0%,100%{transform:scale(1);filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
+  50%{transform:scale(1.05);filter:drop-shadow(0 8px 24px rgba(124,58,237,.35))}
+}
+.deck-pile.my-turn{animation:deck-pulse 1.4s ease-in-out infinite}
+
+/* ── Other players ── */
+.other-players{display:flex;gap:8px;flex-wrap:wrap}
+.other-player-chip{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface2);border-radius:999px;border:1.5px solid transparent;font-size:.8rem}
+.other-player-chip.active-turn{border-color:var(--gold)}
+.chip-cards{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip-elim{opacity:.35;text-decoration:line-through}
+
+/* ── Turn banner ── */
+.turn-banner{text-align:center;padding:10px;border-radius:12px;font-weight:700;font-size:.88rem}
+.turn-banner.my-turn{background:rgba(124,58,237,.15);color:var(--purple);border:1px solid rgba(124,58,237,.3)}
+.turn-banner.other-turn{background:var(--surface2);color:var(--muted)}
+
+/* ── Action buttons ── */
+.action-row{display:flex;gap:8px}
+.action-row .btn{flex:1}
+
+/* ── Modal ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal-bg.hidden{display:none}
+.modal-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+
+/* ── Choice buttons ── */
+.choice-btn{width:100%;padding:13px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;font-family:'Kanit',sans-serif;font-size:.93rem;font-weight:600;color:var(--text);cursor:pointer;text-align:left;transition:border-color .12s,background .12s}
+.choice-btn:active:not(:disabled){transform:scale(.98)}
+.choice-btn.correct{background:rgba(22,163,74,.12);border-color:var(--green);color:var(--green)}
+.choice-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red);opacity:.6}
+.choice-btn:disabled{cursor:default}
+
+/* ── Question box ── */
+.q-box{background:var(--surface);border:1px solid rgba(124,58,237,.3);border-radius:14px;padding:14px}
+
+/* ── Score chips ── */
+.pts-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:.78rem;font-weight:700}
+.pts-3{background:rgba(124,58,237,.15);color:var(--purple)}
+.pts-2{background:rgba(217,119,6,.12);color:var(--amber)}
+.pts-1{background:rgba(22,163,74,.1);color:var(--green)}
+.pts-0{background:var(--surface2);color:var(--muted)}
+
+/* ── End screen ── */
+.rank-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:12px}
+.rank-row.top{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3)}
+.rank-num{font-size:1.1rem;font-weight:800;width:26px;text-align:center;flex-shrink:0}
+.rank-score{margin-left:auto;font-size:1.1rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+
+/* ── Spy reveal ── */
+.spy-reveal-card{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1.5px solid rgba(124,58,237,.4);border-radius:16px;padding:20px;text-align:center}
+</style>
+
+<!-- ═══════════════════════════════ SCREENS ═══ -->
+
+<div id="s-home" class="screen active">
+  <div style="padding-top:12px;text-align:center">
+    <div style="font-size:3rem;margin-bottom:8px">🎴</div>
+    <div class="title">Hidden Intel</div>
+    <div class="subtitle" style="margin-top:6px">สุ่มการ์ด · รวบข้อมูล · แอบดูเพื่อน · ทายตัวละครอนิเมะ</div>
+  </div>
+  <div class="card" style="font-size:.82rem;line-height:1.7;color:var(--muted)">
+    <span style="color:var(--text);font-weight:600">วิธีเล่น:</span> แต่ละรอบมีตัวละครให้ทาย · กดสุ่มการ์ดทีละใบ · ใบ 👀 ให้แอบดูข้อมูลเพื่อน · ใครรู้เร็วตอบได้ก่อน
+  </div>
+  <div class="btn-stack" style="padding-top:4px">
+    <button class="btn btn-purple" onclick="initCreateRoom()">👑 สร้างห้อง (Host)</button>
+    <button class="btn btn-ghost"  onclick="showScreen('s-join')">🔑 เข้าร่วมห้อง</button>
+  </div>
+</div>
+
+<div id="s-create" class="screen">
+  <div class="title" style="font-size:1.4rem">สร้างห้อง</div>
+  <div class="card" style="text-align:center">
+    <div class="section-label">รหัสห้อง</div>
+    <div class="room-code" id="create-room-code">——</div>
+    <div class="subtitle" style="margin-top:4px">แชร์รหัสนี้ให้เพื่อน</div>
+  </div>
+  <div>
+    <div class="section-label">จำนวนรอบ</div>
+    <div style="display:flex;gap:8px" id="rounds-sel">
+      <button class="btn btn-ghost btn-sm rounds-opt active-round" data-r="3" onclick="selectRounds(3,this)">3 รอบ</button>
+      <button class="btn btn-ghost btn-sm rounds-opt" data-r="5" onclick="selectRounds(5,this)">5 รอบ</button>
+      <button class="btn btn-ghost btn-sm rounds-opt" data-r="7" onclick="selectRounds(7,this)">7 รอบ</button>
+    </div>
+  </div>
+  <div>
+    <div class="section-label">ผู้เล่น (<span id="create-pcount">0</span>)</div>
+    <div id="create-plist" style="display:flex;flex-direction:column;gap:7px"></div>
+  </div>
+  <div class="btn-stack">
+    <button class="btn btn-green" id="create-start-btn" onclick="hostStart()" disabled>▶ เริ่มเกม</button>
+    <button class="btn btn-ghost" onclick="leaveRoom()">ออกจากห้อง</button>
+  </div>
+</div>
+<style>.active-round{border-color:var(--purple)!important;color:var(--purple)!important}</style>
+
+<div id="s-join" class="screen">
+  <div class="title" style="font-size:1.4rem">เข้าร่วมห้อง</div>
+  <div>
+    <label>รหัสห้อง</label>
+    <input class="input" id="join-code" placeholder="HI1234" maxlength="6" style="text-transform:uppercase;letter-spacing:.12em;font-size:1.3rem;text-align:center" oninput="this.value=this.value.toUpperCase()">
+  </div>
+  <div>
+    <label>ชื่อของคุณ</label>
+    <input class="input" id="join-name" placeholder="ใส่ชื่อ" maxlength="12">
+  </div>
+  <div>
+    <label>เลือก Avatar</label>
+    <div class="avatar-grid" id="join-av-grid"></div>
+  </div>
+  <div class="btn-stack">
+    <button class="btn btn-purple" onclick="joinRoom()">เข้าร่วม</button>
+    <button class="btn btn-ghost"  onclick="showScreen('s-home')">ย้อนกลับ</button>
+  </div>
+  <div id="join-err" style="color:var(--red);font-size:.85rem;text-align:center"></div>
+</div>
+
+<div id="s-lobby" class="screen">
+  <div style="text-align:center">
+    <div class="subtitle">รหัสห้อง</div>
+    <div class="room-code" id="lobby-code">——</div>
+  </div>
+  <div>
+    <div class="section-label">ผู้เล่น (<span id="lobby-pcount">0</span>)</div>
+    <div id="lobby-plist" style="display:flex;flex-direction:column;gap:7px"></div>
+  </div>
+  <div style="text-align:center;color:var(--muted);font-size:.85rem">รอ Host กด "เริ่มเกม"...</div>
+  <div class="btn-stack">
+    <button class="btn btn-ghost" onclick="leaveRoom()">ออกจากห้อง</button>
+  </div>
+</div>
+
+<div id="s-playing" class="screen">
+  <div id="playing-content"></div>
+</div>
+
+<div id="s-reveal" class="screen">
+  <div id="reveal-content"></div>
+</div>
+
+<div id="s-end" class="screen">
+  <div class="title" style="font-size:1.5rem">🏆 จบเกม!</div>
+  <div id="end-content"></div>
+  <div class="btn-stack" style="margin-top:8px">
+    <button class="btn btn-purple" onclick="goHome()">🏠 กลับหน้าแรก</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MODALS ═══ -->
+
+<!-- Spy target picker -->
+<div class="modal-bg hidden" id="m-spy">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-weight:700;font-size:1rem;margin-bottom:4px">👀 แอบดูใคร?</div>
+    <div class="subtitle" style="margin-bottom:14px">เลือกผู้เล่นที่จะแอบดูการ์ด 1 ใบ</div>
+    <div id="spy-targets" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button class="btn btn-ghost" style="margin-top:14px;font-size:.85rem" onclick="closeModal('m-spy')">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- Spy result -->
+<div class="modal-bg hidden" id="m-spy-result">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-weight:700;font-size:1rem;text-align:center;margin-bottom:12px">🕵️ สิ่งที่คุณเห็น</div>
+    <div class="spy-reveal-card" id="spy-result-content"></div>
+    <div class="subtitle" style="text-align:center;margin-top:10px;font-size:.75rem">เพื่อนไม่รู้ว่าคุณเห็นสิ่งนี้</div>
+    <button class="btn btn-purple" style="margin-top:16px" onclick="closeModal('m-spy-result');advanceTurn()">รับทราบ</button>
+  </div>
+</div>
+
+<!-- Answer modal -->
+<div class="modal-bg hidden" id="m-answer">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-weight:700;font-size:.95rem;margin-bottom:4px">🎯 ตอบคำถาม</div>
+    <div class="subtitle" style="margin-bottom:14px">ตัวละครนี้คือใคร?</div>
+    <div id="answer-choices" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button class="btn btn-ghost" style="margin-top:12px;font-size:.82rem" onclick="closeModal('m-answer')">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
+
+<script>
+// ════════════════════════════════════ CONFIG ════
+const firebaseConfig = {
+  apiKey:            "AIzaSyBMKDRyDXmHNG73L1RU05K8z8PZ72yTuL0",
+  authDomain:        "trap-word.firebaseapp.com",
+  databaseURL:       "https://trap-word-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "trap-word",
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.database();
+
+// ════════════════════════════════════ STATE ════
+let allQ      = [];
+let myUid     = null;
+let myName    = '';
+let myAvatar  = '🦊';
+let myBg      = '#1c2440';
+let roomId    = null;
+let roomRef   = null;
+let roomData  = null;
+let isHost    = false;
+let numRounds = 3;
+let myDeck    = [];
+let myHand    = [];
+let spyCardUsed = false;
+
+const AVATARS   = ['🦊','🐼','🐯','🐸','🐺','🦁','🐧','🦋','🐙','🦄'];
+const AV_COLORS = ['#2d1b4e','#1b2d4e','#1b4e2d','#4e2d1b','#4e1b2d','#2d4e1b','#1b4e4e','#4e4e1b','#1b1b4e','#4e1b4e'];
+
+// ════════════════════════════════════ INIT ════
+async function init() {
+  try { allQ = await fetch('./questions.json').then(r=>r.json()); } catch(e) { console.error(e); }
+  buildAvGrid('join-av-grid');
+  auth.signInAnonymously().then(u => { myUid = u.user.uid; });
+}
+
+function buildAvGrid(gridId) {
+  const el = document.getElementById(gridId);
+  if (!el) return;
+  el.innerHTML = AVATARS.map((av,i)=>`
+    <div class="av-opt ${i===0?'selected':''}" data-av="${av}" data-bg="${AV_COLORS[i]}"
+      onclick="pickAv(this,'${gridId}')" style="background:${AV_COLORS[i]}">${av}</div>
+  `).join('');
+  myAvatar = AVATARS[0]; myBg = AV_COLORS[0];
+}
+
+function pickAv(el, gid) {
+  document.querySelectorAll(`#${gid} .av-opt`).forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  myAvatar = el.dataset.av; myBg = el.dataset.bg;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() {
+  leaveRoom();
+  showScreen('s-home');
+}
+
+// ════════════════════════════════════ ROUNDS SELECTOR ════
+function selectRounds(n, el) {
+  numRounds = n;
+  document.querySelectorAll('.rounds-opt').forEach(e=>e.classList.remove('active-round'));
+  el.classList.add('active-round');
+  if (roomRef) roomRef.update({ numRounds: n });
+}
+
+// ════════════════════════════════════ CREATE ROOM ════
+function genCode() {
+  const ch = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c = 'HI';
+  for (let i=0;i<4;i++) c += ch[Math.floor(Math.random()*ch.length)];
+  return c;
+}
+
+async function initCreateRoom() {
+  if (!myUid) { setTimeout(initCreateRoom,400); return; }
+  isHost  = true;
+  myName  = 'Host';
+  roomId  = genCode();
+  roomRef = db.ref('ci_rooms/'+roomId);
+  document.getElementById('create-room-code').textContent = roomId;
+  await roomRef.set({
+    host: myUid, phase: 'lobby', numRounds,
+    players: { [myUid]: { name:'Host', avatar:'👑', avatarBg:'#2d1b4e', score:0, online:true } }
+  });
+  roomRef.onDisconnect().remove();
+  roomRef.on('value', snap => { roomData = snap.val(); if (!roomData) { goHome(); return; } syncState(); });
+  showScreen('s-create');
+}
+
+// ════════════════════════════════════ JOIN ROOM ════
+function joinRoom() {
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  const name = document.getElementById('join-name').value.trim();
+  const err  = document.getElementById('join-err');
+  if (!code||code.length<4) { err.textContent='ใส่รหัสห้องให้ครบ'; return; }
+  if (!name) { err.textContent='ใส่ชื่อก่อน'; return; }
+  err.textContent = '';
+  myName = name; isHost = false; roomId = code;
+  roomRef = db.ref('ci_rooms/'+roomId);
+  roomRef.once('value', snap => {
+    if (!snap.exists()) { err.textContent='ไม่พบห้องนี้'; return; }
+    roomRef.child('players/'+myUid).set({ name, avatar:myAvatar, avatarBg:myBg, score:0, online:true });
+    roomRef.child('players/'+myUid).onDisconnect().remove();
+    roomRef.on('value', s => { roomData=s.val(); if(!roomData){goHome();return;} syncState(); });
+    showScreen('s-lobby');
+  });
+}
+
+// ════════════════════════════════════ LEAVE ════
+function leaveRoom() {
+  if (roomRef) {
+    roomRef.off();
+    if (isHost) roomRef.remove();
+    else if (myUid) roomRef.child('players/'+myUid).remove();
+    roomRef = null;
+  }
+  roomData=null; roomId=null; isHost=false; myDeck=[]; myHand=[]; spyCardUsed=false;
+}
+
+// ════════════════════════════════════ SYNC STATE ════
+function syncState() {
+  if (!roomData) return;
+  const players = roomData.players || {};
+  const count   = Object.keys(players).length;
+
+  // Create screen
+  const pcount = document.getElementById('create-pcount');
+  if (pcount) pcount.textContent = count;
+  const plist = document.getElementById('create-plist');
+  if (plist) {
+    plist.innerHTML = Object.entries(players).map(([uid,p])=>`
+      <div class="player-row">
+        <div class="av-sm" style="background:${p.avatarBg}">${p.avatar}</div>
+        <div class="player-name">${p.name}${uid===roomData.host?' 👑':''}</div>
+        <div class="player-score">${p.score||0} แต้ม</div>
+      </div>`).join('');
+    const sb = document.getElementById('create-start-btn');
+    if (sb) sb.disabled = count < 2;
+  }
+
+  // Lobby screen
+  const lcount = document.getElementById('lobby-pcount');
+  if (lcount) lcount.textContent = count;
+  const lcode = document.getElementById('lobby-code');
+  if (lcode) lcode.textContent = roomId;
+  const llist = document.getElementById('lobby-plist');
+  if (llist) {
+    llist.innerHTML = Object.entries(players).map(([uid,p])=>`
+      <div class="player-row">
+        <div class="av-sm" style="background:${p.avatarBg}">${p.avatar}</div>
+        <div class="player-name">${p.name}${uid===roomData.host?' 👑':''}</div>
+        <div class="player-score">${p.score||0} แต้ม</div>
+      </div>`).join('');
+  }
+
+  const ph = roomData.phase;
+  if (ph === 'playing') {
+    const curScreen = document.querySelector('.screen.active')?.id;
+    if (curScreen !== 's-playing') { showScreen('s-playing'); initRoundClient(); }
+    else renderPlaying();
+  } else if (ph === 'reveal') {
+    if (document.querySelector('.screen.active')?.id !== 's-reveal') showReveal();
+  } else if (ph === 'end') {
+    showEnd();
+  }
+}
+
+// ════════════════════════════════════ HOST START ════
+function hostStart() {
+  if (!isHost || !allQ.length) return;
+  const players = roomData?.players || {};
+  const uids    = Object.keys(players);
+  const pool    = shuffle([...allQ]);
+  const qOrder  = pool.slice(0, numRounds).map(q=>q.id);
+  const tOrder  = shuffle([...uids]);
+
+  // Build decks for each player (same card pool, different shuffle)
+  const decks = {};
+  uids.forEach(uid => { decks[uid] = shuffle([0,1,2,3,4,5,6,7,8,9]); });
+
+  roomRef.update({
+    phase: 'playing',
+    numRounds,
+    questionOrder: qOrder,
+    currentQNum: 0,
+    turnOrder: tOrder,
+    currentRound: {
+      currentTurn: tOrder[0],
+      decks,
+      drawnCounts: Object.fromEntries(uids.map(u=>[u,0])),
+      eliminated: {},
+      winner: null,
+      winnerCount: 0
+    }
+  });
+}
+
+// ════════════════════════════════════ CLIENT ROUND INIT ════
+function initRoundClient() {
+  const cr  = roomData?.currentRound;
+  if (!cr) return;
+  const deckIndices = cr.decks?.[myUid] || shuffle([0,1,2,3,4,5,6,7,8,9]);
+  myDeck = [...deckIndices];
+  myHand = [];
+  spyCardUsed = false;
+  renderPlaying();
+}
+
+// ════════════════════════════════════ RENDER PLAYING ════
+function renderPlaying() {
+  const cr      = roomData?.currentRound;
+  const players = roomData?.players || {};
+  const qIdx    = roomData?.currentQNum || 0;
+  const qId     = (roomData?.questionOrder||[])[qIdx];
+  const q       = allQ.find(x=>x.id===qId);
+  const tOrder  = roomData?.turnOrder || [];
+  const myTurn  = cr?.currentTurn === myUid;
+  const myElim  = cr?.eliminated?.[myUid];
+  const remaining = myDeck.length;
+
+  if (!q) return;
+
+  // Other players chips
+  const others = Object.entries(players).filter(([uid])=>uid!==myUid);
+  const othersHtml = others.map(([uid,p])=>{
+    const isActiveTurn = cr?.currentTurn === uid;
+    const isElim = cr?.eliminated?.[uid];
+    const dCount = cr?.drawnCounts?.[uid] || 0;
+    return `<div class="other-player-chip ${isActiveTurn?'active-turn':''} ${isElim?'chip-elim':''}">
+      <div>${p.avatar}</div>
+      <div style="font-size:.8rem;font-weight:600">${p.name}</div>
+      <div class="chip-cards">🃏${dCount}</div>
+      ${isActiveTurn?'<div style="font-size:.6rem;color:var(--gold)">◀</div>':''}
+    </div>`;
+  }).join('');
+
+  // My hand cards
+  const handHtml = myHand.map((card,i)=>`
+    <div class="play-card-wrap flipped" id="hcard-${i}">
+      <div class="play-card-inner">
+        <div class="play-card-face play-card-back-face">
+          <span class="pcc pcc-tl">◈</span><span class="pcc pcc-tr">◈</span>
+          <span class="pcc pcc-bl">◈</span><span class="pcc pcc-br">◈</span>
+          <div class="pce-wrap">
+            <div class="pce-spin"></div><div class="pce-spin2"></div>
+            <div class="pce"><span class="pce-glyph">⟡</span></div>
+          </div>
+          <div class="pce-name">Hidden Intel</div>
+          <div class="pce-shimmer"></div>
+        </div>
+        <div class="play-card-face play-card-front-face type-${card.type}">
+          <div class="card-inner-content">
+            <div class="card-type-label">${card.type==='spy'?'👀 SPY':card.type.toUpperCase()}</div>
+            <div class="card-label">${card.label}</div>
+            <div class="card-text">${card.text}</div>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Deck pile
+  const deckHtml = remaining > 0 ? `
+    <div class="deck-pile ${myTurn&&!myElim?'my-turn':''}" onclick="${myTurn&&!myElim&&remaining>0?'drawCard()':''}">
+      <div class="deck-pile-card"></div>
+      <div class="deck-pile-card"></div>
+      <div class="deck-pile-card">
+        <span class="pcc pcc-tl" style="font-size:.45rem">◈</span>
+        <span class="pcc pcc-br" style="font-size:.45rem">◈</span>
+        <div class="pce-wrap" style="width:44px;height:44px">
+          <div class="pce-spin"></div>
+          <div class="pce" style="width:30px;height:30px;box-shadow:0 0 0 1px rgba(201,162,39,.7),0 0 0 3px rgba(201,162,39,.07),0 0 0 4px rgba(201,162,39,.4),0 0 0 7px rgba(201,162,39,.04),0 0 0 8px rgba(201,162,39,.2),0 0 14px rgba(124,58,237,.6)">
+            <span class="pce-glyph" style="font-size:.8rem">⟡</span>
+          </div>
+        </div>
+      </div>
+      <div class="deck-count-badge">${remaining}</div>
+    </div>` : `<div style="font-size:.8rem;color:var(--muted);padding:8px">กองหมดแล้ว</div>`;
+
+  // Has spy card in hand
+  const hasSpyCard = myHand.some(c=>c.type==='spy') && !spyCardUsed;
+  const othersAlive = Object.entries(players).filter(([uid,_])=>uid!==myUid && !cr?.eliminated?.[uid]);
+  const canSpy  = hasSpyCard && othersAlive.length > 0;
+  const drawnCount = cr?.drawnCounts?.[myUid] || 0;
+
+  // Turn info
+  const turnPlayerName = players[cr?.currentTurn]?.name || '';
+  const turnHtml = myElim
+    ? `<div class="turn-banner other-turn">❌ คุณตอบผิดในรอบนี้ — ดูคนอื่นเล่นต่อ</div>`
+    : myTurn
+      ? `<div class="turn-banner my-turn">⭐ เทิร์นของคุณ — สุ่มการ์ดหรือตอบได้เลย</div>`
+      : `<div class="turn-banner other-turn">รอ ${turnPlayerName} เล่น...</div>`;
+
+  document.getElementById('playing-content').innerHTML = `
+    <div class="q-box">
+      <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">
+        รอบ ${qIdx+1}/${roomData?.numRounds||numRounds} · ตัวละครนี้คือใคร?
+      </div>
+      <div style="font-size:1.1rem;font-weight:800;color:var(--text)">🎴 ทาย&shy;ตัว&shy;ละ&shy;คร</div>
+    </div>
+    <div>
+      <div class="section-label">ผู้เล่นในวง</div>
+      <div class="other-players">${othersHtml}</div>
+    </div>
+    ${turnHtml}
+    <div>
+      <div class="section-label">การ์ดในมือคุณ (${myHand.length} ใบ)</div>
+      ${myHand.length > 0
+        ? `<div class="hand-scroll">${handHtml}</div>`
+        : `<div style="font-size:.82rem;color:var(--muted);padding:4px 0">ยังไม่มีการ์ด — กดสุ่มเพื่อเปิดใบแรก</div>`}
+    </div>
+    <div>
+      <div class="section-label">กองการ์ดของคุณ</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        ${deckHtml}
+        <div style="font-size:.8rem;color:var(--muted);line-height:1.6">
+          ${myTurn&&!myElim?'<span style="color:var(--purple);font-weight:600">กดกองการ์ด</span>เพื่อสุ่ม':''}
+          ${remaining===0?'ใบหมดแล้ว':''}
+        </div>
+      </div>
+    </div>
+    <div class="action-row">
+      ${canSpy&&myTurn&&!myElim
+        ? `<button class="btn btn-purple" onclick="openSpyModal()">👀 แอบดูเพื่อน</button>`
+        : `<button class="btn btn-ghost" disabled style="opacity:.3">👀 แอบดู${!hasSpyCard?'(ไม่มีการ์ด)':!myTurn?'(รอเทิร์น)':''}</button>`}
+      <button class="btn btn-gold" onclick="openAnswerModal()" ${myElim?'disabled style="opacity:.3"':''}>
+        🎯 ตอบ! ${drawnCount>0?`(${drawnCount}ใบ)`:''}
+      </button>
+    </div>
+    ${isHost?`<button class="btn btn-ghost" style="font-size:.78rem;padding:9px;opacity:.4;margin-top:-4px" onclick="hostSkipRound()">⏭ ข้ามรอบ (Host)</button>`:''}
+  `;
+}
+
+// ════════════════════════════════════ DRAW CARD ════
+function drawCard() {
+  const cr = roomData?.currentRound;
+  if (!cr || cr.currentTurn !== myUid) return;
+  if (myDeck.length === 0) return;
+
+  const cardIdx  = myDeck.shift();
+  const qId      = (roomData.questionOrder||[])[roomData.currentQNum||0];
+  const q        = allQ.find(x=>x.id===qId);
+  if (!q) return;
+  const card     = q.cards[cardIdx];
+
+  // Add to hand
+  myHand.push(card);
+
+  // Update Firebase drawn count
+  const newCount = (cr.drawnCounts?.[myUid]||0) + 1;
+  roomRef.child('currentRound/drawnCounts/'+myUid).set(newCount);
+
+  // If spy card: auto-use prompt (or just add to hand)
+  renderPlaying();
+
+  // Animate new card
+  const newIdx = myHand.length - 1;
+  const cardEl = document.getElementById(`hcard-${newIdx}`);
+  if (cardEl) {
+    cardEl.classList.remove('flipped');
+    cardEl.classList.add('card-new');
+    // Scroll to new card
+    const scroll = cardEl.closest('.hand-scroll');
+    if (scroll) scroll.scrollLeft = scroll.scrollWidth;
+    // Flip after short delay
+    setTimeout(()=>{ cardEl.classList.add('flipped'); }, 350);
+  }
+}
+
+// ════════════════════════════════════ SPY ════
+function openSpyModal() {
+  const players = roomData?.players || {};
+  const cr      = roomData?.currentRound;
+  const targets = Object.entries(players).filter(([uid,_])=>
+    uid !== myUid && !cr?.eliminated?.[uid]
+  );
+  document.getElementById('spy-targets').innerHTML = targets.map(([uid,p])=>`
+    <div class="player-row" style="cursor:pointer;border:1.5px solid var(--border)" onclick="executeSpy('${uid}')">
+      <div class="av-sm" style="background:${p.avatarBg}">${p.avatar}</div>
+      <div class="player-name">${p.name}</div>
+      <div style="margin-left:auto;font-size:.75rem;color:var(--muted)">🃏 ${cr?.drawnCounts?.[uid]||0} ใบ</div>
+    </div>`).join('');
+  document.getElementById('m-spy').classList.remove('hidden');
+}
+
+function executeSpy(targetUid) {
+  closeModal('m-spy');
+  const cr     = roomData?.currentRound;
+  const target = roomData?.players?.[targetUid];
+  if (!cr || !target) return;
+
+  // Get target's drawn count → pick one of their drawn cards
+  const drawn = cr.drawnCounts?.[targetUid] || 0;
+  if (drawn === 0) {
+    document.getElementById('spy-result-content').innerHTML = `
+      <div style="font-size:1.5rem">🤷</div>
+      <div style="margin-top:8px;font-weight:600">${target.name} ยังไม่มีการ์ดในมือเลย</div>`;
+    document.getElementById('m-spy-result').classList.remove('hidden');
+    // Remove spy card from hand
+    removeSpyCard();
+    return;
+  }
+
+  // Peek at a random drawn card of target
+  // We use target's deck order from Firebase + how many they drew
+  const targetDeck  = cr.decks?.[targetUid] || [];
+  const drawnIdxs   = targetDeck.slice(0, drawn);
+  const peekCardIdx = drawnIdxs[Math.floor(Math.random() * drawnIdxs.length)];
+  const qId  = (roomData.questionOrder||[])[roomData.currentQNum||0];
+  const q    = allQ.find(x=>x.id===qId);
+  const card = q?.cards[peekCardIdx];
+  if (!card) return;
+
+  // Show result
+  document.getElementById('spy-result-content').innerHTML = `
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px">การ์ดของ ${target.avatar} ${target.name}</div>
+    <div class="card-type-label" style="margin:0 auto 8px;background:rgba(124,58,237,.2);color:var(--c-spy)">
+      ${card.type.toUpperCase()} · ${card.label}
+    </div>
+    <div style="font-size:1rem;font-weight:600;line-height:1.5">${card.text}</div>`;
+  document.getElementById('m-spy-result').classList.remove('hidden');
+
+  // Remove spy card from hand
+  removeSpyCard();
+  spyCardUsed = true;
+}
+
+function removeSpyCard() {
+  const idx = myHand.findIndex(c=>c.type==='spy');
+  if (idx !== -1) myHand.splice(idx, 1);
+}
+
+// ════════════════════════════════════ ANSWER ════
+function openAnswerModal() {
+  const cr = roomData?.currentRound;
+  if (cr?.eliminated?.[myUid]) return;
+  const qId = (roomData?.questionOrder||[])[roomData?.currentQNum||0];
+  const q   = allQ.find(x=>x.id===qId);
+  if (!q) return;
+
+  // Build choices: correct + 3 wrong
+  const wrong = shuffle(allQ.filter(x=>x.id!==q.id)).slice(0,3).map(x=>x.answer);
+  const opts  = shuffle([q.answer, ...wrong]);
+
+  document.getElementById('answer-choices').innerHTML = opts.map(opt=>`
+    <button class="choice-btn" onclick="submitAnswer('${opt.replace(/'/g,"\\'")}','${q.answer.replace(/'/g,"\\'")}')">
+      ${opt}
+    </button>`).join('');
+  document.getElementById('m-answer').classList.remove('hidden');
+}
+
+async function submitAnswer(selected, correct) {
+  document.querySelectorAll('#answer-choices .choice-btn').forEach(btn=>{
+    btn.disabled = true;
+    const txt = btn.textContent.trim();
+    if (txt === selected) btn.classList.add(selected===correct?'correct':'wrong');
+    if (txt === correct && selected !== correct) btn.classList.add('correct');
+  });
+
+  if (selected === correct) {
+    const cr         = roomData?.currentRound;
+    const drawnCount = cr?.drawnCounts?.[myUid] || 0;
+    const pts        = drawnCount <= 2 ? 3 : drawnCount <= 4 ? 2 : 1;
+    const newScore   = (roomData?.players?.[myUid]?.score||0) + pts;
+
+    setTimeout(async ()=>{
+      closeModal('m-answer');
+      await roomRef.update({
+        'currentRound/winner': myUid,
+        'currentRound/winnerCount': drawnCount,
+        [`players/${myUid}/score`]: newScore,
+        phase: 'reveal'
+      });
+    }, 900);
+  } else {
+    setTimeout(async ()=>{
+      closeModal('m-answer');
+      await roomRef.child(`currentRound/eliminated/${myUid}`).set(true);
+      // Check if all eliminated
+      const players  = roomData?.players || {};
+      const allElim  = Object.keys(players).every(uid=>roomData?.currentRound?.eliminated?.[uid]||uid===myUid);
+      if (allElim) await roomRef.update({ phase: 'reveal' });
+    }, 900);
+  }
+}
+
+// ════════════════════════════════════ ADVANCE TURN ════
+function advanceTurn() {
+  if (!isHost) return;
+  const cr      = roomData?.currentRound;
+  const tOrder  = roomData?.turnOrder || [];
+  const players = roomData?.players || {};
+  const cur     = tOrder.indexOf(cr?.currentTurn);
+  let next = (cur + 1) % tOrder.length;
+  let safety = 0;
+  while (cr?.eliminated?.[tOrder[next]] && safety < tOrder.length) {
+    next = (next + 1) % tOrder.length;
+    safety++;
+  }
+  roomRef.child('currentRound/currentTurn').set(tOrder[next]);
+}
+
+function hostSkipRound() {
+  if (!isHost) return;
+  roomRef.update({ phase: 'reveal', 'currentRound/winner': null });
+}
+
+// ════════════════════════════════════ REVEAL ════
+function showReveal() {
+  const cr      = roomData?.currentRound;
+  const players = roomData?.players || {};
+  const qIdx    = roomData?.currentQNum || 0;
+  const qId     = (roomData?.questionOrder||[])[qIdx];
+  const q       = allQ.find(x=>x.id===qId);
+  if (!q) return;
+
+  const winner    = cr?.winner ? players[cr.winner] : null;
+  const winCount  = cr?.winnerCount || 0;
+  const pts       = winCount <= 2 ? 3 : winCount <= 4 ? 2 : 1;
+  const ptsCls    = pts===3?'pts-3':pts===2?'pts-2':'pts-1';
+
+  const nextBtn = isHost
+    ? `<button class="btn btn-purple" onclick="hostNextRound()">ต่อไป ▶</button>`
+    : `<div style="text-align:center;color:var(--muted);font-size:.85rem">รอ Host กด "ต่อไป"...</div>`;
+
+  document.getElementById('reveal-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="text-align:center">
+        <div style="font-size:2.8rem">🎌</div>
+        <div style="font-size:1.6rem;font-weight:900;margin-top:6px">${q.answer}</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-top:4px">จาก ${q.anime}</div>
+      </div>
+      ${winner
+        ? `<div class="card" style="text-align:center">
+            <div>${winner.avatar} <strong>${winner.name}</strong> ตอบถูก!</div>
+            <div class="pts-chip ${ptsCls}" style="margin:8px auto 0">+${pts} แต้ม (เปิด ${winCount} ใบ)</div>
+           </div>`
+        : `<div class="card" style="text-align:center;color:var(--muted)">ไม่มีใครตอบถูกรอบนี้ 😔</div>`}
+      <div>
+        <div class="section-label">ไพ่ทั้ง 10 ใบ</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          ${q.cards.filter(c=>c.type!=='spy').map(c=>`
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:11px;border-left:3px solid var(--c-${c.type})">
+              <div>
+                <div style="font-size:.65rem;font-weight:700;color:var(--c-${c.type});text-transform:uppercase">${c.type} · ${c.label}</div>
+                <div style="font-size:.85rem;margin-top:2px;line-height:1.4">${c.text}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="btn-stack">
+        ${nextBtn}
+        <button class="btn btn-ghost" onclick="leaveRoom()" style="font-size:.78rem;padding:9px;opacity:.5">ออกจากห้อง</button>
+      </div>
+    </div>`;
+  showScreen('s-reveal');
+}
+
+async function hostNextRound() {
+  if (!isHost) return;
+  const nextQNum = (roomData?.currentQNum||0) + 1;
+  const total    = roomData?.numRounds || numRounds;
+  if (nextQNum >= total) {
+    await roomRef.update({ phase: 'end' });
+    return;
+  }
+  const players = roomData?.players || {};
+  const uids    = Object.keys(players);
+  const decks   = {};
+  uids.forEach(uid=>{ decks[uid]=shuffle([0,1,2,3,4,5,6,7,8,9]); });
+  const tOrder  = shuffle([...uids]);
+  await roomRef.update({
+    phase: 'playing',
+    currentQNum: nextQNum,
+    turnOrder: tOrder,
+    currentRound: {
+      currentTurn: tOrder[0],
+      decks,
+      drawnCounts: Object.fromEntries(uids.map(u=>[u,0])),
+      eliminated: {},
+      winner: null,
+      winnerCount: 0
+    }
+  });
+  myDeck=[]; myHand=[]; spyCardUsed=false;
+}
+
+// ════════════════════════════════════ END ════
+function showEnd() {
+  const players = roomData?.players || {};
+  const sorted  = Object.entries(players).sort((a,b)=>(b[1].score||0)-(a[1].score||0));
+  document.getElementById('end-content').innerHTML = `
+    <div class="card" style="text-align:center;margin-bottom:4px">
+      <div style="font-size:2rem">${sorted[0]?.[1]?.avatar||'🏆'}</div>
+      <div style="font-size:1.3rem;font-weight:900;margin-top:4px">${sorted[0]?.[1]?.name||'—'} ชนะ!</div>
+      <div style="color:var(--gold);font-weight:700;margin-top:2px">${sorted[0]?.[1]?.score||0} แต้ม</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      ${sorted.map(([uid,p],i)=>`
+        <div class="rank-row ${i===0?'top':''}">
+          <div class="rank-num">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+          <div class="av-sm" style="background:${p.avatarBg}">${p.avatar}</div>
+          <div class="player-name">${p.name}</div>
+          <div class="rank-score">${p.score||0}</div>
+        </div>`).join('')}
+    </div>`;
+  showScreen('s-end');
+}
+
+// ════════════════════════════════════ UTILS ════
+function shuffle(arr) {
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+
+// Close modal on background tap
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.add('hidden'); });
+});
+
+init();
+</script>
