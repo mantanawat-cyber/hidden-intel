@@ -644,7 +644,7 @@ function syncState() {
     plist.innerHTML = Object.entries(players).map(([uid,p])=>`
       <div class="player-row">
         <div class="av-sm" style="background:${p.avatarBg}">${p.avatar}</div>
-        <div class="player-name">${p.name}${uid===roomData.host?' 👑':''}</div>
+        <div class="player-name">${esc(p.name)}${uid===roomData.host?' 👑':''}</div>
         <div class="player-score">${p.score||0} แต้ม</div>
       </div>`).join('');
     const sb = document.getElementById('create-start-btn');
@@ -661,7 +661,7 @@ function syncState() {
     llist.innerHTML = Object.entries(players).map(([uid,p])=>`
       <div class="player-row">
         <div class="av-sm" style="background:${p.avatarBg}">${p.avatar}</div>
-        <div class="player-name">${p.name}${uid===roomData.host?' 👑':''}</div>
+        <div class="player-name">${esc(p.name)}${uid===roomData.host?' 👑':''}</div>
         <div class="player-score">${p.score||0} แต้ม</div>
       </div>`).join('');
   }
@@ -712,9 +712,18 @@ function hostStart() {
 function initRoundClient() {
   const cr  = roomData?.currentRound;
   if (!cr) return;
-  const deckIndices = cr.decks?.[myUid] || shuffle([0,1,2,3,4,5,6,7,8,9]);
-  myDeck = [...deckIndices];
-  myHand = [];
+  const deckIndices  = cr.decks?.[myUid] || shuffle([0,1,2,3,4,5,6,7,8,9]);
+  const drawnCount   = cr.drawnCounts?.[myUid] || 0;
+  // Skip already-drawn cards so player can't redraw after refresh
+  myDeck = deckIndices.slice(drawnCount);
+  // Reconstruct hand from cards already drawn
+  if (drawnCount > 0) {
+    const qId = (roomData.questionOrder||[])[roomData.currentQNum||0];
+    const q   = allQ.find(x=>x.id===qId);
+    myHand = q ? deckIndices.slice(0, drawnCount).map(idx=>q.cards[idx]).filter(Boolean) : [];
+  } else {
+    myHand = [];
+  }
   spyCardUsed = false;
   renderPlaying();
 }
@@ -741,7 +750,7 @@ function renderPlaying() {
     const dCount = cr?.drawnCounts?.[uid] || 0;
     return `<div class="other-player-chip ${isActiveTurn?'active-turn':''} ${isElim?'chip-elim':''}">
       <div>${p.avatar}</div>
-      <div style="font-size:.8rem;font-weight:600">${p.name}</div>
+      <div style="font-size:.8rem;font-weight:600">${esc(p.name)}</div>
       <div class="chip-cards">🃏${dCount}</div>
       ${isActiveTurn?'<div style="font-size:.6rem;color:var(--gold)">◀</div>':''}
     </div>`;
@@ -922,7 +931,7 @@ function executeSpy(targetUid) {
 
   // Show result
   document.getElementById('spy-result-content').innerHTML = `
-    <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px">การ์ดของ ${target.avatar} ${target.name}</div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px">การ์ดของ ${target.avatar} ${esc(target.name)}</div>
     <div class="card-type-label" style="margin:0 auto 8px;background:rgba(124,58,237,.2);color:var(--c-spy)">
       ${card.type.toUpperCase()} · ${card.label}
     </div>
@@ -968,12 +977,15 @@ async function submitAnswer(selected, correct) {
 
   if (selected === correct) {
     const cr         = roomData?.currentRound;
+    // Guard race condition: someone else may have already answered
+    if (roomData?.phase !== 'playing') { setTimeout(()=>closeModal('m-answer'), 900); return; }
     const drawnCount = cr?.drawnCounts?.[myUid] || 0;
     const pts        = drawnCount <= 2 ? 3 : drawnCount <= 4 ? 2 : 1;
     const newScore   = (roomData?.players?.[myUid]?.score||0) + pts;
 
     setTimeout(async ()=>{
       closeModal('m-answer');
+      if (roomData?.phase !== 'playing') return;
       await roomRef.update({
         'currentRound/winner': myUid,
         'currentRound/winnerCount': drawnCount,
@@ -984,6 +996,7 @@ async function submitAnswer(selected, correct) {
   } else {
     setTimeout(async ()=>{
       closeModal('m-answer');
+      if (roomData?.phase !== 'playing') return;
       await roomRef.child(`currentRound/eliminated/${myUid}`).set(true);
       // Check if all eliminated
       const players  = roomData?.players || {};
@@ -995,22 +1008,26 @@ async function submitAnswer(selected, correct) {
 
 // ════════════════════════════════════ PASS TURN ════
 function passTurn() {
-  if (!isHost) { showToast('รอ Host ผ่านเทิร์น...'); return; }
+  const cr = roomData?.currentRound;
+  if (cr?.currentTurn !== myUid && !isHost) { showToast('ไม่ใช่เทิร์นของคุณ'); return; }
   advanceTurn();
 }
 
 // ════════════════════════════════════ ADVANCE TURN ════
 function advanceTurn() {
-  if (!isHost) return;
-  const cr      = roomData?.currentRound;
+  const cr = roomData?.currentRound;
+  if (!isHost && cr?.currentTurn !== myUid) return;
   const tOrder  = roomData?.turnOrder || [];
-  const players = roomData?.players || {};
   const cur     = tOrder.indexOf(cr?.currentTurn);
   let next = (cur + 1) % tOrder.length;
   let safety = 0;
   while (cr?.eliminated?.[tOrder[next]] && safety < tOrder.length) {
     next = (next + 1) % tOrder.length;
     safety++;
+  }
+  if (safety >= tOrder.length) {
+    roomRef.update({ phase: 'reveal' });
+    return;
   }
   roomRef.child('currentRound/currentTurn').set(tOrder[next]);
 }
@@ -1115,7 +1132,7 @@ function showEnd() {
         <div class="rank-row ${i===0?'top':''}">
           <div class="rank-num">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
           <div class="av-sm" style="background:${p.avatarBg}">${p.avatar}</div>
-          <div class="player-name">${p.name}</div>
+          <div class="player-name">${esc(p.name)}</div>
           <div class="rank-score">${p.score||0}</div>
         </div>`).join('')}
     </div>`;
@@ -1130,6 +1147,7 @@ function shuffle(arr) {
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // Close modal on background tap
 document.querySelectorAll('.modal-bg').forEach(bg=>{
