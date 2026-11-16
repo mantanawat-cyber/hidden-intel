@@ -362,7 +362,8 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
     <span style="color:var(--text);font-weight:600">วิธีเล่น:</span> แต่ละรอบมีตัวละครให้ทาย · กดสุ่มการ์ดทีละใบ · ใบ 👀 ให้แอบดูข้อมูลเพื่อน · ใครรู้เร็วตอบได้ก่อน
   </div>
   <div class="btn-stack" style="padding-top:4px">
-    <button class="btn btn-purple" onclick="showScreen('s-host-setup')">👑 สร้างห้อง (Host)</button>
+    <button class="btn btn-purple" onclick="showScreen('s-solo-setup')">🎮 เล่นคนเดียว</button>
+    <button class="btn btn-ghost"  onclick="showScreen('s-host-setup')">👑 สร้างห้อง (Host)</button>
     <button class="btn btn-ghost"  onclick="showScreen('s-join')">🔑 เข้าร่วมห้อง</button>
   </div>
 </div>
@@ -459,6 +460,43 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
   <div id="end-content"></div>
   <div class="btn-stack" style="margin-top:8px">
     <button class="btn btn-purple" onclick="goHome()">🏠 กลับหน้าแรก</button>
+  </div>
+</div>
+
+<div id="s-solo-setup" class="screen">
+  <div class="title" style="font-size:1.4rem">🎮 เล่นคนเดียว</div>
+  <div class="card" style="font-size:.82rem;line-height:1.7;color:var(--muted)">
+    สุ่มการ์ดทีละใบ · รวบข้อมูล · ทายตัวละครอนิเมะ · ยิ่งทายเร็วยิ่งได้แต้มมาก
+  </div>
+  <div>
+    <div class="section-label">จำนวนรอบ</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm solo-rounds-opt active-round" data-r="3" onclick="selectSoloRounds(3,this)">3 รอบ</button>
+      <button class="btn btn-ghost btn-sm solo-rounds-opt" data-r="5" onclick="selectSoloRounds(5,this)">5 รอบ</button>
+      <button class="btn btn-ghost btn-sm solo-rounds-opt" data-r="7" onclick="selectSoloRounds(7,this)">7 รอบ</button>
+      <button class="btn btn-ghost btn-sm solo-rounds-opt" data-r="99" onclick="selectSoloRounds(99,this)">ทั้งหมด</button>
+    </div>
+  </div>
+  <div class="btn-stack">
+    <button class="btn btn-purple" onclick="startSolo()">▶ เริ่มเลย</button>
+    <button class="btn btn-ghost"  onclick="showScreen('s-home')">ย้อนกลับ</button>
+  </div>
+</div>
+
+<div id="s-solo-play" class="screen">
+  <div id="solo-play-content"></div>
+</div>
+
+<div id="s-solo-reveal" class="screen">
+  <div id="solo-reveal-content"></div>
+</div>
+
+<div id="s-solo-end" class="screen">
+  <div class="title" style="font-size:1.5rem">🏆 จบแล้ว!</div>
+  <div id="solo-end-content"></div>
+  <div class="btn-stack" style="margin-top:8px">
+    <button class="btn btn-purple" onclick="startSolo()">🔄 เล่นอีกครั้ง</button>
+    <button class="btn btn-ghost"  onclick="goHome()">🏠 กลับหน้าแรก</button>
   </div>
 </div>
 
@@ -1183,6 +1221,193 @@ function showEnd() {
         </div>`).join('')}
     </div>`;
   showScreen('s-end');
+}
+
+// ════════════════════════════════════ SOLO MODE ════
+let soloScore     = 0;
+let soloRound     = 0;
+let soloNumRounds = 3;
+let soloQuestions = [];
+let soloDeck      = [];
+let soloHand      = [];
+let soloElim      = false;
+let _soloNewIdx   = -1;
+
+function selectSoloRounds(n, el) {
+  soloNumRounds = n;
+  document.querySelectorAll('.solo-rounds-opt').forEach(e=>e.classList.remove('active-round'));
+  el.classList.add('active-round');
+}
+
+function startSolo() {
+  soloScore = 0; soloRound = 0;
+  soloQuestions = shuffle([...allQ]).slice(0, Math.min(soloNumRounds, allQ.length));
+  startSoloRound();
+}
+
+function startSoloRound() {
+  soloDeck = shuffle([0,1,2,3,4,5,6,7]);  // 8 info cards, no spy
+  soloHand = []; soloElim = false; _soloNewIdx = -1;
+  renderSoloPlay();
+  showScreen('s-solo-play');
+}
+
+function renderSoloPlay() {
+  const q = soloQuestions[soloRound];
+  if (!q) return;
+  const rem = soloDeck.length;
+
+  const handHtml = soloHand.map((card,i)=>`
+    <div class="hand-card-wrap type-${card.type}${i===_soloNewIdx?' card-new':''}" id="shcard-${i}">
+      ${i===_soloNewIdx?`<div class="card-flip-back"><span style="font-size:1.1rem;opacity:.35;color:rgba(201,162,39,.7)">⟡</span></div>`:''}
+      <div class="card-inner-content">
+        <div class="card-type-label">${card.type.toUpperCase()}</div>
+        <div class="card-label">${card.label}</div>
+        <div class="card-text">${card.text}</div>
+      </div>
+    </div>`).join('');
+
+  const deckHtml = rem > 0 ? `
+    <div class="deck-pile ${!soloElim?'my-turn':''}" onclick="${!soloElim?'soloDrawCard()':''}">
+      <div class="deck-pile-card"></div><div class="deck-pile-card"></div>
+      <div class="deck-pile-card">
+        <span class="pcc pcc-tl" style="font-size:.45rem">◈</span>
+        <span class="pcc pcc-br" style="font-size:.45rem">◈</span>
+        <div class="pce-wrap" style="width:44px;height:44px">
+          <div class="pce-spin"></div>
+          <div class="pce" style="width:30px;height:30px;box-shadow:0 0 0 1px rgba(201,162,39,.7),0 0 0 3px rgba(201,162,39,.07),0 0 0 4px rgba(201,162,39,.4),0 0 0 7px rgba(201,162,39,.04),0 0 0 8px rgba(201,162,39,.2),0 0 14px rgba(124,58,237,.6)">
+            <span class="pce-glyph" style="font-size:.8rem">⟡</span>
+          </div>
+        </div>
+      </div>
+      <div class="deck-count-badge">${rem}</div>
+    </div>` : `<div style="font-size:.8rem;color:var(--muted);padding:8px">กองหมดแล้ว</div>`;
+
+  document.getElementById('solo-play-content').innerHTML = `
+    <div class="q-box" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div>
+        <div style="font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">รอบ ${soloRound+1}/${soloQuestions.length}</div>
+        <div style="font-size:1rem;font-weight:800;margin-top:1px">🎴 ทายตัวละครอนิเมะ</div>
+      </div>
+      <div style="font-size:1.1rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums">${soloScore} pt</div>
+    </div>
+    ${soloElim
+      ? `<div class="turn-banner other-turn">❌ ตอบผิดแล้ว</div>`
+      : `<div class="turn-banner my-turn">🎮 กดสุ่มการ์ดแล้วทาย</div>`}
+    <div>
+      <div class="section-label">การ์ดในมือ (${soloHand.length} ใบ) · กองเหลือ ${rem}</div>
+      <div class="deck-hand-row">
+        ${deckHtml}
+        ${soloHand.length > 0
+          ? `<div class="hand-scroll">${handHtml}</div>`
+          : `<div style="font-size:.8rem;color:var(--muted);padding:4px 0;align-self:center">${!soloElim?'<span style="color:var(--purple);font-weight:600">กดกองการ์ด</span>เพื่อสุ่ม':''}</div>`}
+      </div>
+    </div>
+    <div class="play-action-bar">
+      <button class="btn btn-gold" onclick="openSoloAnswerModal()" ${soloElim?'disabled style="opacity:.3"':''}>🎯 ตอบ!</button>
+      ${soloElim?`<button class="btn btn-ghost" style="margin-top:8px" onclick="showSoloReveal()">ดูเฉลย ▶</button>`:''}
+      <button class="btn btn-ghost" style="font-size:.75rem;padding:8px;opacity:.3;margin-top:6px" onclick="goHome()">ออกจากเกม</button>
+    </div>`;
+}
+
+function soloDrawCard() {
+  if (soloElim || soloDeck.length === 0) return;
+  const cardIdx = soloDeck.shift();
+  const card = soloQuestions[soloRound]?.cards[cardIdx];
+  if (!card) return;
+  soloHand.push(card);
+  _soloNewIdx = soloHand.length - 1;
+  renderSoloPlay();
+  const el = document.getElementById(`shcard-${soloHand.length-1}`);
+  const sc = el?.closest('.hand-scroll');
+  if (sc) sc.scrollLeft = sc.scrollWidth;
+}
+
+function openSoloAnswerModal() {
+  if (soloElim) return;
+  const q = soloQuestions[soloRound];
+  if (!q) return;
+  const wrong = shuffle(allQ.filter(x=>x.id!==q.id)).slice(0,3).map(x=>x.answer);
+  const opts  = shuffle([q.answer, ...wrong]);
+  document.getElementById('answer-choices').innerHTML = opts.map(opt=>`
+    <button class="choice-btn" onclick="submitSoloAnswer('${opt.replace(/'/g,"\\'")}','${q.answer.replace(/'/g,"\\'")}')">
+      ${opt}
+    </button>`).join('');
+  document.getElementById('m-answer').classList.remove('hidden');
+}
+
+function submitSoloAnswer(selected, correct) {
+  document.querySelectorAll('#answer-choices .choice-btn').forEach(btn=>{
+    btn.disabled = true;
+    const txt = btn.textContent.trim();
+    if (txt === selected) btn.classList.add(selected===correct?'correct':'wrong');
+    if (txt === correct && selected !== correct) btn.classList.add('correct');
+  });
+  setTimeout(()=>{
+    closeModal('m-answer');
+    if (selected === correct) {
+      const pts = soloHand.length <= 2 ? 3 : soloHand.length <= 4 ? 2 : 1;
+      soloScore += pts;
+      showSoloReveal(pts);
+    } else {
+      soloElim = true;
+      renderSoloPlay();
+    }
+  }, 900);
+}
+
+function showSoloReveal(pts) {
+  const q = soloQuestions[soloRound];
+  const isCorrect = pts != null;
+  const nextBtn = soloRound + 1 < soloQuestions.length
+    ? `<button class="btn btn-purple" onclick="soloNextRound()">ต่อไป ▶</button>`
+    : `<button class="btn btn-purple" onclick="showSoloEnd()">🏆 ดูผลรวม</button>`;
+
+  document.getElementById('solo-reveal-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="text-align:center">
+        <div style="font-size:2.8rem">🎌</div>
+        <div style="font-size:1.6rem;font-weight:900;margin-top:6px">${q.answer}</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-top:4px">จาก ${q.anime}</div>
+      </div>
+      ${isCorrect
+        ? `<div class="card" style="text-align:center">
+            <div>✅ ตอบถูก!</div>
+            <div class="pts-chip ${pts===3?'pts-3':pts===2?'pts-2':'pts-1'}" style="margin:8px auto 0">+${pts} แต้ม (เปิด ${soloHand.length} ใบ)</div>
+           </div>`
+        : `<div class="card" style="text-align:center;color:var(--muted)">❌ ตอบผิด ไม่ได้แต้มรอบนี้ 😔</div>`}
+      <div>
+        <div class="section-label">ไพ่ทั้ง 8 ใบ</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          ${q.cards.filter(c=>c.type!=='spy').map(c=>`
+            <div style="display:flex;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:11px;border-left:3px solid var(--c-${c.type})">
+              <div>
+                <div style="font-size:.65rem;font-weight:700;color:var(--c-${c.type});text-transform:uppercase">${c.type} · ${c.label}</div>
+                <div style="font-size:.85rem;margin-top:2px;line-height:1.4">${c.text}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="btn-stack">${nextBtn}
+        <button class="btn btn-ghost" onclick="goHome()" style="font-size:.78rem;padding:9px;opacity:.5">ออก</button>
+      </div>
+    </div>`;
+  showScreen('s-solo-reveal');
+}
+
+function soloNextRound() { soloRound++; startSoloRound(); }
+
+function showSoloEnd() {
+  const max = soloQuestions.length * 3;
+  const pct = soloScore / max;
+  const [icon, label] = pct >= .8 ? ['🏆','ยอดเยี่ยม!'] : pct >= .6 ? ['⭐','ดีมาก'] : pct >= .4 ? ['👍','พอใช้'] : ['📚','ฝึกอีกนิด'];
+  document.getElementById('solo-end-content').innerHTML = `
+    <div class="card" style="text-align:center;margin-bottom:8px">
+      <div style="font-size:2.5rem">${icon}</div>
+      <div style="font-size:1.5rem;font-weight:900;margin-top:6px;color:var(--gold)">${soloScore} / ${max} แต้ม</div>
+      <div style="color:var(--muted);font-size:.88rem;margin-top:4px">${label}</div>
+    </div>`;
+  showScreen('s-solo-end');
 }
 
 // ════════════════════════════════════ UTILS ════
