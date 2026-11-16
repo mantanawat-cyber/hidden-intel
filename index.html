@@ -197,8 +197,8 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .type-medium .card-type-label{background:rgba(217,119,6,.18);color:#fbbf24}
 .type-hard  .card-type-label{background:rgba(220,38,38,.18);color:#f87171}
 .type-spy   .card-type-label{background:rgba(124,58,237,.22);color:#a78bfa}
-.card-label{font-size:.6rem;color:var(--muted);margin-top:5px;font-weight:600;letter-spacing:.03em}
-.card-text{font-size:.68rem;line-height:1.45;color:var(--text);margin-top:3px;flex:1;overflow:hidden}
+.card-label{font-size:.62rem;color:var(--muted);margin-top:4px;font-weight:600;letter-spacing:.03em}
+.card-text{font-size:.72rem;line-height:1.4;color:var(--text);margin-top:2px;flex:1;overflow:hidden}
 
 /* New card deal animation */
 @keyframes card-deal{
@@ -321,9 +321,26 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
     <span style="color:var(--text);font-weight:600">วิธีเล่น:</span> แต่ละรอบมีตัวละครให้ทาย · กดสุ่มการ์ดทีละใบ · ใบ 👀 ให้แอบดูข้อมูลเพื่อน · ใครรู้เร็วตอบได้ก่อน
   </div>
   <div class="btn-stack" style="padding-top:4px">
-    <button class="btn btn-purple" onclick="initCreateRoom()">👑 สร้างห้อง (Host)</button>
+    <button class="btn btn-purple" onclick="showScreen('s-host-setup')">👑 สร้างห้อง (Host)</button>
     <button class="btn btn-ghost"  onclick="showScreen('s-join')">🔑 เข้าร่วมห้อง</button>
   </div>
+</div>
+
+<div id="s-host-setup" class="screen">
+  <div class="title" style="font-size:1.4rem">ตั้งค่า Host</div>
+  <div>
+    <label>ชื่อของคุณ</label>
+    <input class="input" id="host-name" placeholder="ใส่ชื่อ" maxlength="12">
+  </div>
+  <div>
+    <label>เลือก Avatar</label>
+    <div class="avatar-grid" id="host-av-grid"></div>
+  </div>
+  <div class="btn-stack">
+    <button class="btn btn-purple" onclick="initCreateRoom()">👑 สร้างห้อง</button>
+    <button class="btn btn-ghost"  onclick="showScreen('s-home')">ย้อนกลับ</button>
+  </div>
+  <div id="host-err" style="color:var(--red);font-size:.85rem;text-align:center"></div>
 </div>
 
 <div id="s-create" class="screen">
@@ -478,6 +495,7 @@ const AV_COLORS = ['#2d1b4e','#1b2d4e','#1b4e2d','#4e2d1b','#4e1b2d','#2d4e1b','
 async function init() {
   try { allQ = await fetch('./questions.json').then(r=>r.json()); } catch(e) { console.error(e); }
   buildAvGrid('join-av-grid');
+  buildAvGrid('host-av-grid');
   auth.signInAnonymously()
     .then(u => { myUid = u.user.uid; })
     .catch(err => {
@@ -508,6 +526,11 @@ function buildAvGrid(gridId) {
       onclick="pickAv(this,'${gridId}')" style="background:${AV_COLORS[i]}">${av}</div>
   `).join('');
   myAvatar = AVATARS[0]; myBg = AV_COLORS[0];
+}
+
+function showHostSetup() {
+  buildAvGrid('host-av-grid');
+  showScreen('s-host-setup');
 }
 
 function pickAv(el, gid) {
@@ -557,14 +580,19 @@ async function initCreateRoom() {
     return;
   }
   initCreateRoom._tries = 0;
+  const nameEl = document.getElementById('host-name');
+  const hostName = nameEl ? nameEl.value.trim() : '';
+  const errEl = document.getElementById('host-err');
+  if (!hostName) { if(errEl) errEl.textContent='ใส่ชื่อก่อน'; return; }
+  if(errEl) errEl.textContent='';
   isHost  = true;
-  myName  = 'Host';
+  myName  = hostName;
   roomId  = genCode();
   roomRef = db.ref('ci_rooms/'+roomId);
   document.getElementById('create-room-code').textContent = roomId;
   await roomRef.set({
     host: myUid, phase: 'lobby', numRounds,
-    players: { [myUid]: { name:'Host', avatar:'👑', avatarBg:'#2d1b4e', score:0, online:true } }
+    players: { [myUid]: { name:myName, avatar:myAvatar, avatarBg:myBg, score:0, online:true } }
   });
   roomRef.onDisconnect().remove();
   roomRef.on('value', snap => { roomData = snap.val(); if (!roomData) { goHome(); return; } syncState(); });
@@ -803,6 +831,9 @@ function renderPlaying() {
           🎯 ตอบ!${drawnCount>0?` (${drawnCount}ใบ)`:''}
         </button>
       </div>
+      ${myTurn&&!myElim&&drawnCount>0
+        ? `<button class="btn btn-ghost" style="margin-top:8px;font-size:.88rem" onclick="passTurn()">⏩ ผ่านเทิร์น</button>`
+        : ''}
       ${isHost?`<button class="btn btn-ghost" style="font-size:.75rem;padding:8px;opacity:.35;margin-top:6px" onclick="hostSkipRound()">⏭ ข้ามรอบ (Host)</button>`:''}
     </div>
   `;
@@ -959,6 +990,12 @@ async function submitAnswer(selected, correct) {
       if (allElim) await roomRef.update({ phase: 'reveal' });
     }, 900);
   }
+}
+
+// ════════════════════════════════════ PASS TURN ════
+function passTurn() {
+  if (!isHost) { showToast('รอ Host ผ่านเทิร์น...'); return; }
+  advanceTurn();
 }
 
 // ════════════════════════════════════ ADVANCE TURN ════
