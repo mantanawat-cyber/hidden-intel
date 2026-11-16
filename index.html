@@ -202,23 +202,32 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 
 /* New card deal animation */
 @keyframes card-deal{
-  0%  {opacity:0;transform:translateY(-50px) translateX(10px) rotateY(-30deg) scale(.75)}
-  55% {opacity:1;transform:translateY(3px) translateX(0) rotateY(-6deg) scale(1.03)}
-  75% {transform:translateY(-2px) rotateY(3deg) scale(1.01)}
-  100%{transform:translateY(0) rotateY(0deg) scale(1)}
+  0%  {opacity:0;transform:translateY(-24px) scale(.88)}
+  70% {opacity:1;transform:translateY(2px) scale(1.03)}
+  100%{transform:translateY(0) scale(1)}
 }
-@keyframes card-flip-glow{
-  0%  {filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
-  40% {filter:drop-shadow(0 8px 24px rgba(124,58,237,.5))}
-  100%{filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))}
+.card-new{animation:card-deal .38s cubic-bezier(.22,1,.36,1) forwards}
+
+/* ── Hand card (front face, always visible) ── */
+.hand-card-wrap{
+  flex-shrink:0;width:80px;height:112px;border-radius:14px;border:2px solid;
+  overflow:hidden;display:flex;flex-direction:column;cursor:default;
+  scroll-snap-align:start;
 }
-.card-new{animation:card-deal .45s cubic-bezier(.22,1,.36,1) forwards}
-.card-new.flipped .play-card-inner{animation:card-flip-glow .6s ease-out forwards}
+.hand-card-wrap::before{content:'';display:block;height:4px;flex-shrink:0;width:100%}
+.hand-card-wrap.type-easy  {background:linear-gradient(160deg,rgba(22,163,74,.18),rgba(22,163,74,.07));border-color:rgba(22,163,74,.55)}
+.hand-card-wrap.type-medium{background:linear-gradient(160deg,rgba(217,119,6,.16),rgba(217,119,6,.06));border-color:rgba(217,119,6,.5)}
+.hand-card-wrap.type-hard  {background:linear-gradient(160deg,rgba(220,38,38,.16),rgba(220,38,38,.06));border-color:rgba(220,38,38,.5)}
+.hand-card-wrap.type-spy   {background:linear-gradient(160deg,rgba(124,58,237,.2),rgba(124,58,237,.07));border-color:rgba(124,58,237,.6)}
+.hand-card-wrap.type-easy::before  {background:linear-gradient(90deg,#16a34a,#4ade80)}
+.hand-card-wrap.type-medium::before{background:linear-gradient(90deg,#d97706,#fbbf24)}
+.hand-card-wrap.type-hard::before  {background:linear-gradient(90deg,#dc2626,#f87171)}
+.hand-card-wrap.type-spy::before   {background:linear-gradient(90deg,#7c3aed,#a78bfa)}
 
 /* ── Hand scroll ── */
 .hand-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .hand-scroll::-webkit-scrollbar{display:none}
-.hand-scroll .play-card-wrap{scroll-snap-align:start}
+.hand-scroll .play-card-wrap,.hand-scroll .hand-card-wrap{scroll-snap-align:start}
 
 /* ── Deck + hand row ── */
 .deck-hand-row{display:flex;gap:10px;align-items:flex-start}
@@ -756,27 +765,13 @@ function renderPlaying() {
     </div>`;
   }).join('');
 
-  // My hand cards
+  // My hand cards — rendered directly as front face (no 3D flip needed)
   const handHtml = myHand.map((card,i)=>`
-    <div class="play-card-wrap flipped" id="hcard-${i}">
-      <div class="play-card-inner">
-        <div class="play-card-face play-card-back-face">
-          <span class="pcc pcc-tl">◈</span><span class="pcc pcc-tr">◈</span>
-          <span class="pcc pcc-bl">◈</span><span class="pcc pcc-br">◈</span>
-          <div class="pce-wrap">
-            <div class="pce-spin"></div><div class="pce-spin2"></div>
-            <div class="pce"><span class="pce-glyph">⟡</span></div>
-          </div>
-          <div class="pce-name">Hidden Intel</div>
-          <div class="pce-shimmer"></div>
-        </div>
-        <div class="play-card-face play-card-front-face type-${card.type}">
-          <div class="card-inner-content">
-            <div class="card-type-label">${card.type==='spy'?'👀 SPY':card.type.toUpperCase()}</div>
-            <div class="card-label">${card.label}</div>
-            <div class="card-text">${card.text}</div>
-          </div>
-        </div>
+    <div class="hand-card-wrap type-${card.type} ${i===myHand.length-1?'card-new':''}" id="hcard-${i}">
+      <div class="card-inner-content">
+        <div class="card-type-label">${card.type==='spy'?'👀 SPY':card.type.toUpperCase()}</div>
+        <div class="card-label">${card.label}</div>
+        <div class="card-text">${card.text}</div>
       </div>
     </div>`).join('');
 
@@ -868,16 +863,10 @@ function drawCard() {
 
   renderPlaying();
 
-  // Animate new card
-  const newIdx = myHand.length - 1;
-  const cardEl = document.getElementById(`hcard-${newIdx}`);
-  if (cardEl) {
-    cardEl.classList.remove('flipped');
-    cardEl.classList.add('card-new');
-    const scroll = cardEl.closest('.hand-scroll');
-    if (scroll) scroll.scrollLeft = scroll.scrollWidth;
-    setTimeout(()=>{ cardEl.classList.add('flipped'); }, 350);
-  }
+  // Scroll to new card
+  const newEl = document.getElementById(`hcard-${myHand.length-1}`);
+  const scroll = newEl?.closest('.hand-scroll');
+  if (scroll) scroll.scrollLeft = scroll.scrollWidth;
 
   // Auto-advance turn; spy card shows modal first
   if (card.type === 'spy') {
