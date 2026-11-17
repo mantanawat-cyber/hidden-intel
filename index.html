@@ -365,6 +365,17 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .reveal-card-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .reveal-card-text{font-size:.85rem;margin-top:3px;line-height:1.45}
 
+/* ── Mode cards ── */
+.mode-cards{display:flex;flex-direction:column;gap:8px}
+.mode-card{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;cursor:pointer;text-align:left;font-family:'Kanit',sans-serif;transition:border-color .15s,background .15s}
+.mode-card:hover{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.04)}
+.mode-card.active-round{border-color:var(--purple)!important;background:rgba(124,58,237,.08)!important}
+.mode-card.active-round .mode-card-name{color:var(--purple)}
+.mode-card-icon{font-size:1.6rem;flex-shrink:0;line-height:1}
+.mode-card-body{display:flex;flex-direction:column;gap:2px}
+.mode-card-name{font-size:.95rem;font-weight:700;color:var(--text);transition:color .15s}
+.mode-card-desc{font-size:.72rem;color:var(--muted);line-height:1.4}
+
 /* ── End screen ── */
 .rank-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:12px}
 .rank-row.top{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3)}
@@ -436,11 +447,22 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
   </div>
   <div>
     <div class="section-label">โหมด</div>
-    <div style="display:flex;gap:8px" id="mode-sel">
-      <button class="btn btn-ghost btn-sm mode-opt active-round" data-m="normal" onclick="selectGameMode('normal',this)">🎮 Normal</button>
-      <button class="btn btn-ghost btn-sm mode-opt" data-m="hard" onclick="selectGameMode('hard',this)">🔥 Hard</button>
+    <div class="mode-cards" id="mode-sel">
+      <button class="mode-card mode-opt active-round" data-m="normal" onclick="selectGameMode('normal',this)">
+        <span class="mode-card-icon">🎮</span>
+        <div class="mode-card-body">
+          <div class="mode-card-name">Normal</div>
+          <div class="mode-card-desc">ตัวละครหลัก · ตัวช่วยชื่ออนิเมะ</div>
+        </div>
+      </button>
+      <button class="mode-card mode-opt" data-m="hard" onclick="selectGameMode('hard',this)">
+        <span class="mode-card-icon">🔥</span>
+        <div class="mode-card-body">
+          <div class="mode-card-name">Hard</div>
+          <div class="mode-card-desc">ตัวละครรอง · ไม่บอกชื่ออนิเมะ · ระดับปราบเซียน</div>
+        </div>
+      </button>
     </div>
-    <div id="mode-hint" style="font-size:.72rem;color:var(--muted);margin-top:5px">🎮 ตัวละครหลัก ตัวช่วยชื่ออนิเมะ</div>
   </div>
   <div>
     <div class="section-label">ผู้เล่น (<span id="create-pcount">0</span>)</div>
@@ -521,11 +543,22 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
   </div>
   <div>
     <div class="section-label">โหมด</div>
-    <div style="display:flex;gap:8px" id="solo-mode-sel">
-      <button class="btn btn-ghost btn-sm solo-mode-opt active-round" data-m="normal" onclick="selectSoloMode('normal',this)">🎮 Normal</button>
-      <button class="btn btn-ghost btn-sm solo-mode-opt" data-m="hard" onclick="selectSoloMode('hard',this)">🔥 Hard</button>
+    <div class="mode-cards" id="solo-mode-sel">
+      <button class="mode-card solo-mode-opt active-round" data-m="normal" onclick="selectSoloMode('normal',this)">
+        <span class="mode-card-icon">🎮</span>
+        <div class="mode-card-body">
+          <div class="mode-card-name">Normal</div>
+          <div class="mode-card-desc">ตัวละครหลัก · ตัวช่วยชื่ออนิเมะ</div>
+        </div>
+      </button>
+      <button class="mode-card solo-mode-opt" data-m="hard" onclick="selectSoloMode('hard',this)">
+        <span class="mode-card-icon">🔥</span>
+        <div class="mode-card-body">
+          <div class="mode-card-name">Hard</div>
+          <div class="mode-card-desc">ตัวละครรอง · ไม่บอกชื่ออนิเมะ · ระดับปราบเซียน</div>
+        </div>
+      </button>
     </div>
-    <div id="solo-mode-hint" style="font-size:.72rem;color:var(--muted);margin-top:5px">🎮 ตัวละครหลัก ตัวช่วยชื่ออนิเมะ</div>
   </div>
   <div class="btn-stack">
     <button class="btn btn-purple" onclick="startSolo()">▶ เริ่มเลย</button>
@@ -706,10 +739,6 @@ function selectGameMode(m, el) {
   gameMode = m;
   document.querySelectorAll('.mode-opt').forEach(e=>e.classList.remove('active-round'));
   el.classList.add('active-round');
-  const hint = document.getElementById('mode-hint');
-  hint.textContent = m === 'hard'
-    ? '🔥 ตัวละครรอง โจทย์กำกวม ไม่มีชื่ออนิเมะช่วย'
-    : '🎮 ตัวละครหลัก ตัวช่วยชื่ออนิเมะ';
 }
 
 let soloMode = 'normal';
@@ -717,10 +746,6 @@ function selectSoloMode(m, el) {
   soloMode = m;
   document.querySelectorAll('.solo-mode-opt').forEach(e=>e.classList.remove('active-round'));
   el.classList.add('active-round');
-  const hint = document.getElementById('solo-mode-hint');
-  hint.textContent = m === 'hard'
-    ? '🔥 ตัวละครรอง โจทย์กำกวม ไม่มีชื่ออนิเมะช่วย'
-    : '🎮 ตัวละครหลัก ตัวช่วยชื่ออนิเมะ';
 }
 
 // ════════════════════════════════════ CREATE ROOM ════
