@@ -705,6 +705,7 @@ let myDeck      = [];
 let myHand      = [];
 let spyCardUsed = false;
 let _newCardIdx = -1;
+let _ansCache   = null;  // {qId, opts} — locks choices per question so they can't be probed by reopening
 
 const AVATARS   = ['🦊','🐼','🐯','🐸','🐺','🦁','🐧','🦋','🐙','🦄'];
 const AV_COLORS = ['#2d1b4e','#1b2d4e','#1b4e2d','#4e2d1b','#4e1b2d','#2d4e1b','#1b4e4e','#4e4e1b','#1b1b4e','#4e1b4e'];
@@ -961,6 +962,7 @@ function initRoundClient() {
   }
   spyCardUsed = false;
   _newCardIdx = -1;
+  _ansCache   = null;
   renderPlaying();
 }
 
@@ -1223,11 +1225,14 @@ function openAnswerModal() {
     badge.textContent   = q.anime;
   }
 
-  // Build choices: correct + 3 wrong (same anime first, fill with others)
-  const sameAnime  = shuffle(pool.filter(x=>x.id!==q.id && x.anime===q.anime));
-  const otherAnime = shuffle(pool.filter(x=>x.id!==q.id && x.anime!==q.anime));
-  const wrong = [...sameAnime, ...otherAnime].slice(0,3).map(x=>x.answer);
-  const opts  = shuffle([q.answer, ...wrong]);
+  // Lock choices per question — prevents probing by repeated open/close
+  if (!_ansCache || _ansCache.qId !== qId) {
+    const sameAnime  = shuffle(pool.filter(x=>x.id!==q.id && x.anime===q.anime));
+    const otherAnime = shuffle(pool.filter(x=>x.id!==q.id && x.anime!==q.anime));
+    const wrong = [...sameAnime, ...otherAnime].slice(0,3).map(x=>x.answer);
+    _ansCache = { qId, opts: shuffle([q.answer, ...wrong]) };
+  }
+  const opts = _ansCache.opts;
 
   document.getElementById('answer-choices').innerHTML = opts.map(opt=>`
     <button class="choice-btn" onclick="submitAnswer('${opt.replace(/'/g,"\\'")}','${q.answer.replace(/'/g,"\\'")}')">
@@ -1447,6 +1452,7 @@ function startSolo() {
 
 function startSoloRound() {
   _soloToken++;  // cancel any stale answer timeouts from previous round
+  _ansCache = null;
   soloDeck = shuffle([0,1,2,3,4,5,6,7]);  // 8 info cards, no spy
   soloHand = []; soloElim = false; _soloNewIdx = -1;
   renderSoloPlay();
@@ -1557,10 +1563,13 @@ function openSoloAnswerModal() {
     badge.textContent   = q.anime;
   }
 
-  const sameAnime  = shuffle(pool.filter(x=>x.id!==q.id && x.anime===q.anime));
-  const otherAnime = shuffle(pool.filter(x=>x.id!==q.id && x.anime!==q.anime));
-  const wrong = [...sameAnime, ...otherAnime].slice(0,3).map(x=>x.answer);
-  const opts  = shuffle([q.answer, ...wrong]);
+  if (!_ansCache || _ansCache.qId !== q.id) {
+    const sameAnime  = shuffle(pool.filter(x=>x.id!==q.id && x.anime===q.anime));
+    const otherAnime = shuffle(pool.filter(x=>x.id!==q.id && x.anime!==q.anime));
+    const wrong = [...sameAnime, ...otherAnime].slice(0,3).map(x=>x.answer);
+    _ansCache = { qId: q.id, opts: shuffle([q.answer, ...wrong]) };
+  }
+  const opts = _ansCache.opts;
   const correctIdx = opts.indexOf(q.answer);
   const tok = _soloToken;
   document.getElementById('answer-choices').innerHTML = opts.map((opt, i)=>`
