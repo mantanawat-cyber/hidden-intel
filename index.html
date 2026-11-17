@@ -199,6 +199,9 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .type-spy   .card-type-label{background:rgba(124,58,237,.22);color:#a78bfa}
 .card-label{font-size:.62rem;color:var(--muted);margin-top:4px;font-weight:600;letter-spacing:.03em}
 .card-text{font-size:.72rem;line-height:1.45;color:var(--text);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical}
+.hand-card-wrap.tappable{cursor:pointer}
+.hand-card-wrap.tappable:active{opacity:.8}
+.card-read-more{font-size:.58rem;color:var(--muted);margin-top:3px;opacity:.6}
 
 /* New card deal animation */
 @keyframes card-deal{
@@ -535,6 +538,16 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
   </div>
 </div>
 
+<div class="modal-bg hidden" id="m-card-detail">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="m-card-detail-type" style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px"></div>
+    <div id="m-card-detail-label" style="font-weight:700;font-size:1rem;margin-bottom:10px"></div>
+    <div id="m-card-detail-text" style="font-size:.88rem;line-height:1.65;color:var(--muted)"></div>
+    <button class="btn btn-ghost" style="margin-top:16px;font-size:.82rem" onclick="closeModal('m-card-detail')">ปิด</button>
+  </div>
+</div>
+
 <!-- Firebase -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-auth-compat.min.js"></script>
@@ -839,12 +852,13 @@ function renderPlaying() {
 
   // My hand cards — front face with flip-back overlay for newly drawn card
   const handHtml = myHand.map((card,i)=>`
-    <div class="hand-card-wrap type-${card.type}${i===_newCardIdx?' card-new':''}" id="hcard-${i}">
+    <div class="hand-card-wrap type-${card.type}${i===_newCardIdx?' card-new':''} tappable" id="hcard-${i}" onclick="openCardDetail('${esc(card.label)}','${esc(card.text)}','${card.type}')">
       ${i===_newCardIdx?`<div class="card-flip-back"><span style="font-size:1.1rem;opacity:.35;color:rgba(201,162,39,.7)">⟡</span></div>`:''}
       <div class="card-inner-content">
         <div class="card-type-label">${card.type==='spy'?'👀 SPY':card.type.toUpperCase()}</div>
         <div class="card-label">${card.label}</div>
         <div class="card-text">${card.text}</div>
+        <div class="card-read-more">กดเพื่ออ่านเพิ่ม...</div>
       </div>
     </div>`).join('');
 
@@ -1260,12 +1274,13 @@ function renderSoloPlay() {
   const rem = soloDeck.length;
 
   const handHtml = soloHand.map((card,i)=>`
-    <div class="hand-card-wrap type-${card.type}${i===_soloNewIdx?' card-new':''}" id="shcard-${i}">
+    <div class="hand-card-wrap type-${card.type}${i===_soloNewIdx?' card-new':''} tappable" id="shcard-${i}" onclick="openCardDetail('${esc(card.label)}','${esc(card.text)}','${card.type}')">
       ${i===_soloNewIdx?`<div class="card-flip-back"><span style="font-size:1.1rem;opacity:.35;color:rgba(201,162,39,.7)">⟡</span></div>`:''}
       <div class="card-inner-content">
         <div class="card-type-label">${card.type.toUpperCase()}</div>
         <div class="card-label">${card.label}</div>
         <div class="card-text">${card.text}</div>
+        <div class="card-read-more">กดเพื่ออ่านเพิ่ม...</div>
       </div>
     </div>`).join('');
 
@@ -1422,6 +1437,16 @@ function shuffle(arr) {
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
 function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function openCardDetail(label, text, type) {
+  const typeColors = {easy:'#4ade80',medium:'#fbbf24',hard:'#f87171',spy:'#a78bfa'};
+  const el = document.getElementById('m-card-detail-type');
+  el.textContent = type === 'spy' ? '👀 SPY' : type.toUpperCase();
+  el.style.color = typeColors[type] || 'var(--muted)';
+  document.getElementById('m-card-detail-label').textContent = label;
+  document.getElementById('m-card-detail-text').textContent = text;
+  document.getElementById('m-card-detail').classList.remove('hidden');
+}
 
 // Close modal on background tap
 document.querySelectorAll('.modal-bg').forEach(bg=>{
