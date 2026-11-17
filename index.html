@@ -265,13 +265,13 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .hand-scroll .play-card-wrap,.hand-scroll .hand-card-wrap{scroll-snap-align:start}
 
 /* ── Deck + hand row ── */
-.deck-hand-row{display:flex;gap:10px;align-items:flex-start}
+.deck-hand-row{display:flex;gap:10px;align-items:stretch}
 .deck-hand-row .hand-scroll{flex:1;min-width:0}
 
 /* ── Deck pile ── */
-.deck-pile{position:relative;width:90px;height:126px;cursor:pointer;flex-shrink:0}
+.deck-pile{position:relative;width:90px;min-height:126px;cursor:pointer;flex-shrink:0}
 .deck-pile-card{
-  position:absolute;width:90px;height:126px;
+  position:absolute;width:90px;height:100%;
   background:linear-gradient(155deg,#200848,#0e1744,#071633);
   border:2px solid rgba(201,162,39,.5);
   border-radius:14px;
@@ -296,19 +296,33 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .deck-pile.my-turn{animation:deck-pulse 1.4s ease-in-out infinite}
 
 /* ── Other players ── */
-.other-players{display:flex;gap:8px;flex-wrap:wrap}
-.other-player-chip{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface2);border-radius:999px;border:1.5px solid transparent;font-size:.8rem}
-.other-player-chip.active-turn{border-color:var(--gold)}
-.chip-cards{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.other-players{display:flex;gap:6px;flex-wrap:wrap}
+.other-player-chip{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface2);border-radius:999px;border:1.5px solid transparent;font-size:.8rem;transition:border-color .2s,box-shadow .2s}
+.other-player-chip.active-turn{border-color:var(--gold);box-shadow:0 0 10px rgba(201,162,39,.25)}
+.chip-cards{font-size:.72rem;color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
 .chip-elim{opacity:.35;text-decoration:line-through}
 
+/* ── Round progress dots ── */
+.round-progress{display:flex;align-items:center;gap:5px}
+.rp-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s}
+.rp-dot.done{background:var(--purple)}
+.rp-dot.current{background:var(--gold);transform:scale(1.3);box-shadow:0 0 6px rgba(201,162,39,.5)}
+
+/* ── Score zone badge ── */
+.pts-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.04em}
+.pts-badge.pts-3{background:rgba(22,163,74,.18);color:#4ade80;border:1px solid rgba(22,163,74,.35)}
+.pts-badge.pts-2{background:rgba(217,119,6,.15);color:#fbbf24;border:1px solid rgba(217,119,6,.3)}
+.pts-badge.pts-1{background:rgba(107,122,153,.12);color:var(--muted);border:1px solid var(--border)}
+
 /* ── Question box ── */
-.q-box{background:var(--surface);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:10px}
+.q-box{background:var(--surface);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:10px 12px}
 
 /* ── Turn banner ── */
-.turn-banner{text-align:center;padding:8px 10px;border-radius:10px;font-weight:700;font-size:.82rem}
-.turn-banner.my-turn{background:rgba(124,58,237,.15);color:var(--purple);border:1px solid rgba(124,58,237,.3)}
-.turn-banner.other-turn{background:var(--surface2);color:var(--muted)}
+.turn-banner{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border-radius:12px;font-weight:700;font-size:.85rem}
+.turn-banner.my-turn{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.08));color:var(--purple);border:1.5px solid rgba(124,58,237,.4);animation:turn-pulse 2s ease-in-out infinite}
+.turn-banner.other-turn{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.turn-banner.elim-turn{background:rgba(220,38,38,.08);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+@keyframes turn-pulse{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,.0)}50%{box-shadow:0 0 0 4px rgba(124,58,237,.15)}}
 
 /* ── Action buttons ── */
 .action-row{display:flex;gap:8px}
@@ -333,6 +347,23 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .pts-2{background:rgba(217,119,6,.12);color:var(--amber)}
 .pts-1{background:rgba(22,163,74,.1);color:var(--green)}
 .pts-0{background:var(--surface2);color:var(--muted)}
+
+/* ── Reveal screen ── */
+@keyframes reveal-pop{0%{opacity:0;transform:scale(.75) translateY(16px)}65%{transform:scale(1.04) translateY(-2px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes pts-pop{0%{opacity:0;transform:scale(.4)}65%{transform:scale(1.18)}100%{opacity:1;transform:scale(1)}}
+@keyframes fade-up{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+.reveal-hero{text-align:center;padding:22px 16px;background:linear-gradient(135deg,rgba(201,162,39,.1),rgba(124,58,237,.07));border:1px solid rgba(201,162,39,.22);border-radius:18px;position:relative;overflow:hidden}
+.reveal-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(201,162,39,.12),transparent 65%);pointer-events:none}
+.reveal-name{font-size:1.75rem;font-weight:900;line-height:1.2;animation:reveal-pop .55s cubic-bezier(.34,1.56,.64,1) both}
+.reveal-anime{font-size:.8rem;color:var(--muted);margin-top:5px;animation:fade-up .4s .25s both}
+.winner-banner{display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(135deg,rgba(22,163,74,.12),rgba(22,163,74,.05));border:1.5px solid rgba(22,163,74,.3);border-radius:14px;animation:fade-up .4s .15s both}
+.winner-banner-avatar{font-size:2rem;flex-shrink:0}
+.winner-banner-pts{margin-left:auto;font-size:1.3rem;font-weight:900;animation:pts-pop .45s .35s cubic-bezier(.34,1.56,.64,1) both;flex-shrink:0}
+.no-winner-banner{text-align:center;padding:14px;background:var(--surface2);border-radius:14px;color:var(--muted);font-size:.88rem;animation:fade-up .4s .15s both}
+.reveal-card-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:11px;border-left:3px solid var(--c-${c.type});transition:background .2s}
+.reveal-card-opened{background:rgba(255,255,255,.04);border-left-width:4px}
+.reveal-card-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.reveal-card-text{font-size:.85rem;margin-top:3px;line-height:1.45}
 
 /* ── End screen ── */
 .rank-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:12px}
@@ -931,27 +962,41 @@ function renderPlaying() {
   const canSpy  = hasSpyCard && othersAlive.length > 0;
   const drawnCount = cr?.drawnCounts?.[myUid] || 0;
 
+  // Score zone
+  const pts = drawnCount <= 2 ? 3 : drawnCount <= 4 ? 2 : 1;
+  const ptsClass = `pts-${pts}`;
+  const ptsLabel = pts === 3 ? '🌟 ตอบได้ 3 แต้ม' : pts === 2 ? '⭐ ตอบได้ 2 แต้ม' : '✦ ตอบได้ 1 แต้ม';
+  const ptsBadge = drawnCount > 0 ? `<span class="pts-badge ${ptsClass}">${ptsLabel}</span>` : '';
+
+  // Round progress dots
+  const totalRounds = roomData?.numRounds || numRounds;
+  const dotsHtml = Array.from({length: totalRounds}, (_,i) =>
+    `<div class="rp-dot ${i < qIdx ? 'done' : i === qIdx ? 'current' : ''}"></div>`
+  ).join('');
+
   // Turn info
   const turnPlayerName = players[cr?.currentTurn]?.name || '';
+  const turnPlayerAvatar = players[cr?.currentTurn]?.avatar || '';
   const turnHtml = myElim
-    ? `<div class="turn-banner other-turn">❌ คุณตอบผิดในรอบนี้ — ดูคนอื่นเล่นต่อ</div>`
+    ? `<div class="turn-banner elim-turn">❌ คุณตอบผิดในรอบนี้ — ดูคนอื่นเล่นต่อ</div>`
     : myTurn
-      ? `<div class="turn-banner my-turn">⭐ เทิร์นของคุณ — ${remaining>0?'กดสุ่ม 1 ใบ':'กองหมดแล้ว'} หรือตอบได้เลย</div>`
-      : `<div class="turn-banner other-turn">รอ ${esc(turnPlayerName)} สุ่มการ์ด...</div>`;
+      ? `<div class="turn-banner my-turn"><span>✦</span><span>${remaining>0?'เทิร์นของคุณ — กดสุ่มการ์ด':'เทิร์นของคุณ — กองหมดแล้ว'}</span></div>`
+      : `<div class="turn-banner other-turn"><span>${turnPlayerAvatar}</span><span>รอ ${esc(turnPlayerName)} สุ่มการ์ด...</span></div>`;
 
   document.getElementById('playing-content').innerHTML = `
     <div class="q-box" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-      <div>
-        <div style="font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">
-          รอบ ${qIdx+1}/${roomData?.numRounds||numRounds}
-        </div>
-        <div style="font-size:1rem;font-weight:800;color:var(--text);margin-top:1px">🎴 ทายตัวละครอนิเมะ</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div class="round-progress">${dotsHtml}<span style="font-size:.65rem;font-weight:700;color:var(--muted);margin-left:4px">รอบ ${qIdx+1}/${totalRounds}</span></div>
+        <div style="font-size:1rem;font-weight:800;color:var(--text)">🎴 ทายตัวละครอนิเมะ</div>
       </div>
       <div class="other-players" style="flex-shrink:0">${othersHtml}</div>
     </div>
     ${turnHtml}
     <div>
-      <div class="section-label">การ์ดในมือ (${myHand.length} ใบ) · กองเหลือ ${remaining}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="section-label" style="margin-bottom:0">การ์ดในมือ ${myHand.length} ใบ · กองเหลือ ${remaining}</div>
+        ${ptsBadge}
+      </div>
       <div class="deck-hand-row">
         ${deckHtml}
         ${myHand.length > 0
@@ -1214,29 +1259,40 @@ function showReveal() {
     ? `<button class="btn btn-purple" onclick="hostNextRound()">ต่อไป ▶</button>`
     : `<div style="text-align:center;color:var(--muted);font-size:.85rem">รอ Host กด "ต่อไป"...</div>`;
 
+  // Which card indices the winner opened
+  const winnerDeck  = cr?.decks?.[cr?.winner] || [];
+  const winnerOpened = new Set(winnerDeck.slice(0, winCount));
+  const infoCards   = q.cards.map((c,i)=>({...c, _idx:i})).filter(c=>c.type!=='spy');
+
   document.getElementById('reveal-content').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div style="text-align:center">
-        <div style="font-size:2.8rem">🎌</div>
-        <div style="font-size:1.6rem;font-weight:900;margin-top:6px">${q.answer}</div>
-        <div style="font-size:.82rem;color:var(--muted);margin-top:4px">จาก ${q.anime}</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="reveal-hero">
+        <div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:10px">✦ เฉลย ✦</div>
+        <div class="reveal-name">${q.answer}</div>
+        <div class="reveal-anime">จาก ${q.anime}</div>
       </div>
       ${winner
-        ? `<div class="card" style="text-align:center">
-            <div>${winner.avatar} <strong>${winner.name}</strong> ตอบถูก!</div>
-            <div class="pts-chip ${ptsCls}" style="margin:8px auto 0">+${pts} แต้ม (เปิด ${winCount} ใบ)</div>
+        ? `<div class="winner-banner">
+            <div class="winner-banner-avatar">${winner.avatar}</div>
+            <div>
+              <div style="font-weight:800;font-size:.95rem">${esc(winner.name)}</div>
+              <div style="font-size:.75rem;color:var(--muted)">ตอบถูก · เปิดการ์ด ${winCount} ใบ</div>
+            </div>
+            <div class="winner-banner-pts pts-chip ${ptsCls}">+${pts} pt</div>
            </div>`
-        : `<div class="card" style="text-align:center;color:var(--muted)">ไม่มีใครตอบถูกรอบนี้ 😔</div>`}
+        : `<div class="no-winner-banner">😔 ไม่มีใครตอบถูกรอบนี้</div>`}
       <div>
-        <div class="section-label">ไพ่ทั้ง 10 ใบ</div>
-        <div style="display:flex;flex-direction:column;gap:7px">
-          ${q.cards.filter(c=>c.type!=='spy').map(c=>`
-            <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:11px;border-left:3px solid var(--c-${c.type})">
-              <div>
-                <div style="font-size:.65rem;font-weight:700;color:var(--c-${c.type});text-transform:uppercase">${c.type} · ${c.label}</div>
-                <div style="font-size:.85rem;margin-top:2px;line-height:1.4">${c.text}</div>
+        <div class="section-label">ไพ่ทั้ง 8 ใบ</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${infoCards.map((c,i)=>{
+            const opened = winner && winnerOpened.has(c._idx);
+            return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:${opened?'rgba(255,255,255,.05)':'var(--surface2)'};border-radius:11px;border-left:${opened?'4':'2'}px solid var(--c-${c.type});animation:fade-up .3s ${i*.05}s both">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:.62rem;font-weight:700;color:var(--c-${c.type});text-transform:uppercase;letter-spacing:.06em">${i+1}. ${c.type} · ${c.label}${opened?' ✓':''}</div>
+                <div style="font-size:.85rem;margin-top:3px;line-height:1.45">${c.text}</div>
               </div>
-            </div>`).join('')}
+            </div>`;
+          }).join('')}
         </div>
       </div>
       <div class="btn-stack">
@@ -1362,19 +1418,35 @@ function renderSoloPlay() {
       <div class="deck-count-badge">${rem}</div>
     </div>` : `<div style="font-size:.8rem;color:var(--muted);padding:8px">กองหมดแล้ว</div>`;
 
+  // Solo score zone
+  const soloDrawn = soloHand.length;
+  const soloPts = soloDrawn <= 2 ? 3 : soloDrawn <= 4 ? 2 : 1;
+  const soloPtsClass = `pts-${soloPts}`;
+  const soloPtsLabel = soloPts === 3 ? '🌟 ตอบได้ 3 แต้ม' : soloPts === 2 ? '⭐ ตอบได้ 2 แต้ม' : '✦ ตอบได้ 1 แต้ม';
+  const soloPtsBadge = soloDrawn > 0 ? `<span class="pts-badge ${soloPtsClass}">${soloPtsLabel}</span>` : '';
+
+  // Solo round dots
+  const soloTotal = soloQuestions.length;
+  const soloDotsHtml = Array.from({length: Math.min(soloTotal,10)}, (_,i) =>
+    `<div class="rp-dot ${i < soloRound ? 'done' : i === soloRound ? 'current' : ''}"></div>`
+  ).join('') + (soloTotal > 10 ? `<span style="font-size:.6rem;color:var(--muted)">+${soloTotal-10}</span>` : '');
+
   document.getElementById('solo-play-content').innerHTML = `
     <div class="q-box" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-      <div>
-        <div style="font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">รอบ ${soloRound+1}/${soloQuestions.length}</div>
-        <div style="font-size:1rem;font-weight:800;margin-top:1px">🎴 ทายตัวละครอนิเมะ</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div class="round-progress">${soloDotsHtml}<span style="font-size:.65rem;font-weight:700;color:var(--muted);margin-left:4px">รอบ ${soloRound+1}/${soloTotal}</span></div>
+        <div style="font-size:1rem;font-weight:800">🎴 ทายตัวละครอนิเมะ</div>
       </div>
       <div style="font-size:1.1rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums">${soloScore} pt</div>
     </div>
     ${soloElim
-      ? `<div class="turn-banner other-turn">❌ ตอบผิดแล้ว</div>`
-      : `<div class="turn-banner my-turn">🎮 กดสุ่มการ์ดแล้วทาย</div>`}
+      ? `<div class="turn-banner elim-turn">❌ ตอบผิดแล้ว</div>`
+      : `<div class="turn-banner my-turn"><span>✦</span><span>กดสุ่มการ์ดแล้วทาย</span></div>`}
     <div>
-      <div class="section-label">การ์ดในมือ (${soloHand.length} ใบ) · กองเหลือ ${rem}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="section-label" style="margin-bottom:0">การ์ดในมือ ${soloHand.length} ใบ · กองเหลือ ${rem}</div>
+        ${soloPtsBadge}
+      </div>
       <div class="deck-hand-row">
         ${deckHtml}
         ${soloHand.length > 0
@@ -1457,29 +1529,39 @@ function showSoloReveal(pts) {
     ? `<button class="btn btn-purple" onclick="soloNextRound()">ต่อไป ▶</button>`
     : `<button class="btn btn-purple" onclick="showSoloEnd()">🏆 ดูผลรวม</button>`;
 
+  const soloInfoCards = q.cards.map((c,i)=>({...c,_idx:i})).filter(c=>c.type!=='spy');
+  const soloOpenedSet = new Set(soloHand.map(hc=>q.cards.findIndex(c=>c.label===hc.label&&c.type===hc.type)));
+  const ptsCls2 = pts===3?'pts-3':pts===2?'pts-2':'pts-1';
+
   document.getElementById('solo-reveal-content').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div style="text-align:center">
-        <div style="font-size:2.8rem">🎌</div>
-        <div style="font-size:1.6rem;font-weight:900;margin-top:6px">${q.answer}</div>
-        <div style="font-size:.82rem;color:var(--muted);margin-top:4px">จาก ${q.anime}</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="reveal-hero">
+        <div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:10px">✦ เฉลย ✦</div>
+        <div class="reveal-name">${q.answer}</div>
+        <div class="reveal-anime">จาก ${q.anime}</div>
       </div>
       ${isCorrect
-        ? `<div class="card" style="text-align:center">
-            <div>✅ ตอบถูก!</div>
-            <div class="pts-chip ${pts===3?'pts-3':pts===2?'pts-2':'pts-1'}" style="margin:8px auto 0">+${pts} แต้ม (เปิด ${soloHand.length} ใบ)</div>
+        ? `<div class="winner-banner">
+            <div class="winner-banner-avatar">✅</div>
+            <div>
+              <div style="font-weight:800;font-size:.95rem">ตอบถูก!</div>
+              <div style="font-size:.75rem;color:var(--muted)">เปิดการ์ด ${soloHand.length} ใบ</div>
+            </div>
+            <div class="winner-banner-pts pts-chip ${ptsCls2}">+${pts} pt</div>
            </div>`
-        : `<div class="card" style="text-align:center;color:var(--muted)">❌ ตอบผิด ไม่ได้แต้มรอบนี้ 😔</div>`}
+        : `<div class="no-winner-banner">❌ ตอบผิด ไม่ได้แต้มรอบนี้</div>`}
       <div>
         <div class="section-label">ไพ่ทั้ง 8 ใบ</div>
-        <div style="display:flex;flex-direction:column;gap:7px">
-          ${q.cards.filter(c=>c.type!=='spy').map(c=>`
-            <div style="display:flex;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:11px;border-left:3px solid var(--c-${c.type})">
-              <div>
-                <div style="font-size:.65rem;font-weight:700;color:var(--c-${c.type});text-transform:uppercase">${c.type} · ${c.label}</div>
-                <div style="font-size:.85rem;margin-top:2px;line-height:1.4">${c.text}</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${soloInfoCards.map((c,i)=>{
+            const opened = soloOpenedSet.has(c._idx);
+            return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:${opened?'rgba(255,255,255,.05)':'var(--surface2)'};border-radius:11px;border-left:${opened?'4':'2'}px solid var(--c-${c.type});animation:fade-up .3s ${i*.05}s both">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:.62rem;font-weight:700;color:var(--c-${c.type});text-transform:uppercase;letter-spacing:.06em">${i+1}. ${c.type} · ${c.label}${opened?' ✓':''}</div>
+                <div style="font-size:.85rem;margin-top:3px;line-height:1.45">${c.text}</div>
               </div>
-            </div>`).join('')}
+            </div>`;
+          }).join('')}
         </div>
       </div>
       <div class="btn-stack">${nextBtn}
