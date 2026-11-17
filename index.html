@@ -376,6 +376,22 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .mode-card-name{font-size:.95rem;font-weight:700;color:var(--text);transition:color .15s}
 .mode-card-desc{font-size:.72rem;color:var(--muted);line-height:1.4}
 
+/* ── Home hero ── */
+@keyframes hero-in{0%{opacity:0;transform:translateY(-10px)}100%{opacity:1;transform:none}}
+.home-hero{position:relative;text-align:center;padding:38px 20px 116px;overflow:hidden;border-radius:20px;background:linear-gradient(150deg,rgba(22,16,46,.85),rgba(13,13,20,.95));border:1px solid rgba(255,255,255,.08);animation:hero-in .45s ease both}
+.home-hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 55% at 15% 90%,rgba(124,58,237,.22) 0%,transparent 100%),radial-gradient(ellipse 55% 45% at 85% 10%,rgba(201,162,39,.18) 0%,transparent 100%)}
+.hero-fan{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);width:220px;height:170px;pointer-events:none}
+.hf-card{position:absolute;bottom:0;left:50%;width:72px;height:108px;margin-left:-36px;border-radius:10px;transform-origin:50% 100%}
+.hfc-1{transform:rotate(-28deg);background:linear-gradient(145deg,rgba(90,30,200,.55),rgba(18,8,46,.75));border:1px solid rgba(124,58,237,.35);opacity:.5}
+.hfc-2{transform:rotate(-14deg);background:linear-gradient(145deg,rgba(130,80,240,.5),rgba(38,14,88,.7));border:1px solid rgba(167,139,250,.3);opacity:.65}
+.hfc-3{transform:rotate(0deg);background:linear-gradient(145deg,rgba(185,140,28,.52),rgba(68,43,5,.72));border:1px solid rgba(201,162,39,.42);opacity:.88}
+.hfc-4{transform:rotate(14deg);background:linear-gradient(145deg,rgba(130,80,240,.5),rgba(38,14,88,.7));border:1px solid rgba(167,139,250,.3);opacity:.65}
+.hfc-5{transform:rotate(28deg);background:linear-gradient(145deg,rgba(90,30,200,.55),rgba(18,8,46,.75));border:1px solid rgba(124,58,237,.35);opacity:.5}
+.hero-content{position:relative;z-index:2}
+.hero-emoji{font-size:2.8rem;line-height:1;display:block;margin-bottom:12px;filter:drop-shadow(0 0 18px rgba(201,162,39,.55))}
+.hero-title{font-size:2.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;background:linear-gradient(128deg,#f0f0f8 10%,#d4aa30 54%,#b8a0f8 94%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-tagline{font-size:.8rem;color:var(--muted);margin-top:9px;letter-spacing:.025em}
+
 /* ── End screen ── */
 .rank-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:12px}
 .rank-row.top{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3)}
@@ -398,10 +414,19 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 <!-- ═══════════════════════════════ SCREENS ═══ -->
 
 <div id="s-home" class="screen active">
-  <div style="padding-top:6px;text-align:center">
-    <div style="font-size:2.2rem;margin-bottom:6px">🎴</div>
-    <div class="title">Hidden Intel</div>
-    <div class="subtitle" style="margin-top:4px">สุ่มการ์ด · รวบข้อมูล · แอบดูเพื่อน · ทายตัวละครอนิเมะ</div>
+  <div class="home-hero">
+    <div class="hero-fan" aria-hidden="true">
+      <div class="hf-card hfc-1"></div>
+      <div class="hf-card hfc-2"></div>
+      <div class="hf-card hfc-3"></div>
+      <div class="hf-card hfc-4"></div>
+      <div class="hf-card hfc-5"></div>
+    </div>
+    <div class="hero-content">
+      <span class="hero-emoji">🎴</span>
+      <div class="hero-title">Hidden Intel</div>
+      <div class="hero-tagline">สุ่มการ์ด · รวบข้อมูล · แอบดูเพื่อน · ทายตัวละครอนิเมะ</div>
+    </div>
   </div>
   <div class="card" style="font-size:.82rem;line-height:1.7;color:var(--muted)">
     <span style="color:var(--text);font-weight:600">วิธีเล่น:</span> แต่ละรอบมีตัวละครให้ทาย · กดสุ่มการ์ดทีละใบ · ใบ 👀 ให้แอบดูข้อมูลเพื่อน · ใครรู้เร็วตอบได้ก่อน
