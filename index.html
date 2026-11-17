@@ -1053,8 +1053,10 @@ function openAnswerModal() {
   const q   = allQ.find(x=>x.id===qId);
   if (!q) return;
 
-  // Build choices: correct + 3 wrong
-  const wrong = shuffle(allQ.filter(x=>x.id!==q.id)).slice(0,3).map(x=>x.answer);
+  // Build choices: correct + 3 wrong (same anime first, fill with others)
+  const sameAnime  = shuffle(allQ.filter(x=>x.id!==q.id && x.anime===q.anime));
+  const otherAnime = shuffle(allQ.filter(x=>x.id!==q.id && x.anime!==q.anime));
+  const wrong = [...sameAnime, ...otherAnime].slice(0,3).map(x=>x.answer);
   const opts  = shuffle([q.answer, ...wrong]);
 
   document.getElementById('answer-choices').innerHTML = opts.map(opt=>`
@@ -1344,7 +1346,9 @@ function openSoloAnswerModal() {
   if (soloElim) return;
   const q = soloQuestions[soloRound];
   if (!q) return;
-  const wrong = shuffle(allQ.filter(x=>x.id!==q.id)).slice(0,3).map(x=>x.answer);
+  const sameAnime  = shuffle(allQ.filter(x=>x.id!==q.id && x.anime===q.anime));
+  const otherAnime = shuffle(allQ.filter(x=>x.id!==q.id && x.anime!==q.anime));
+  const wrong = [...sameAnime, ...otherAnime].slice(0,3).map(x=>x.answer);
   const opts  = shuffle([q.answer, ...wrong]);
   const correctIdx = opts.indexOf(q.answer);
   const tok = _soloToken;
