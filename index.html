@@ -376,10 +376,20 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 .mode-card-name{font-size:.95rem;font-weight:700;color:var(--text);transition:color .15s}
 .mode-card-desc{font-size:.72rem;color:var(--muted);line-height:1.4}
 
+/* ── Home screen background ── */
+#s-home{position:relative;background:radial-gradient(ellipse 100% 30% at 50% 100%,rgba(80,16,170,.14) 0%,transparent 100%)}
+.home-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.home-orb{position:absolute;border-radius:50%;filter:blur(88px)}
+.orb-purple{width:340px;height:340px;background:rgba(124,58,237,.2);bottom:8%;left:-90px;animation:orb-drift 11s ease-in-out infinite}
+.orb-gold{width:280px;height:280px;background:rgba(201,162,39,.14);top:-40px;right:-70px;animation:orb-drift 14s 3s ease-in-out infinite}
+.orb-mid{width:200px;height:200px;background:rgba(100,40,200,.12);top:40%;right:10%;animation:orb-drift 9s 1s ease-in-out infinite alternate-reverse}
+@keyframes orb-drift{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.07)}}
+.home-content{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;flex:1}
+
 /* ── Home hero ── */
 @keyframes hero-in{0%{opacity:0;transform:translateY(-10px)}100%{opacity:1;transform:none}}
-.home-hero{position:relative;text-align:center;padding:38px 20px 116px;overflow:hidden;border-radius:20px;background:linear-gradient(150deg,rgba(22,16,46,.85),rgba(13,13,20,.95));border:1px solid rgba(255,255,255,.08);animation:hero-in .45s ease both}
-.home-hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 55% at 15% 90%,rgba(124,58,237,.22) 0%,transparent 100%),radial-gradient(ellipse 55% 45% at 85% 10%,rgba(201,162,39,.18) 0%,transparent 100%)}
+.home-hero{position:relative;text-align:center;padding:52px 20px 128px;overflow:hidden;background:none;border:none;border-radius:0;animation:hero-in .5s ease both}
+.home-hero::before{display:none}
 .hero-fan{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);width:220px;height:170px;pointer-events:none}
 .hf-card{position:absolute;bottom:0;left:50%;width:72px;height:108px;margin-left:-36px;border-radius:10px;transform-origin:50% 100%}
 .hfc-1{transform:rotate(-28deg);background:linear-gradient(145deg,rgba(90,30,200,.55),rgba(18,8,46,.75));border:1px solid rgba(124,58,237,.35);opacity:.5}
@@ -414,27 +424,34 @@ label{font-size:.83rem;color:var(--muted);display:block;margin-bottom:6px}
 <!-- ═══════════════════════════════ SCREENS ═══ -->
 
 <div id="s-home" class="screen active">
-  <div class="home-hero">
-    <div class="hero-fan" aria-hidden="true">
-      <div class="hf-card hfc-1"></div>
-      <div class="hf-card hfc-2"></div>
-      <div class="hf-card hfc-3"></div>
-      <div class="hf-card hfc-4"></div>
-      <div class="hf-card hfc-5"></div>
-    </div>
-    <div class="hero-content">
-      <span class="hero-emoji">🎴</span>
-      <div class="hero-title">Hidden Intel</div>
-      <div class="hero-tagline">สุ่มการ์ด · รวบข้อมูล · แอบดูเพื่อน · ทายตัวละครอนิเมะ</div>
-    </div>
+  <div class="home-bg" aria-hidden="true">
+    <div class="home-orb orb-purple"></div>
+    <div class="home-orb orb-gold"></div>
+    <div class="home-orb orb-mid"></div>
   </div>
-  <div class="card" style="font-size:.82rem;line-height:1.7;color:var(--muted)">
-    <span style="color:var(--text);font-weight:600">วิธีเล่น:</span> แต่ละรอบมีตัวละครให้ทาย · กดสุ่มการ์ดทีละใบ · ใบ 👀 ให้แอบดูข้อมูลเพื่อน · ใครรู้เร็วตอบได้ก่อน
-  </div>
-  <div class="btn-stack" style="padding-top:4px">
-    <button class="btn btn-purple" onclick="showScreen('s-solo-setup')">🎮 เล่นคนเดียว</button>
-    <button class="btn btn-ghost"  onclick="showScreen('s-host-setup')">👑 สร้างห้อง (Host)</button>
-    <button class="btn btn-ghost"  onclick="showScreen('s-join')">🔑 เข้าร่วมห้อง</button>
+  <div class="home-content">
+    <div class="home-hero">
+      <div class="hero-fan" aria-hidden="true">
+        <div class="hf-card hfc-1"></div>
+        <div class="hf-card hfc-2"></div>
+        <div class="hf-card hfc-3"></div>
+        <div class="hf-card hfc-4"></div>
+        <div class="hf-card hfc-5"></div>
+      </div>
+      <div class="hero-content">
+        <span class="hero-emoji">🎴</span>
+        <div class="hero-title">Hidden Intel</div>
+        <div class="hero-tagline">สุ่มการ์ด · รวบข้อมูล · แอบดูเพื่อน · ทายตัวละครอนิเมะ</div>
+      </div>
+    </div>
+    <div class="card" style="font-size:.82rem;line-height:1.7;color:var(--muted)">
+      <span style="color:var(--text);font-weight:600">วิธีเล่น:</span> แต่ละรอบมีตัวละครให้ทาย · กดสุ่มการ์ดทีละใบ · ใบ 👀 ให้แอบดูข้อมูลเพื่อน · ใครรู้เร็วตอบได้ก่อน
+    </div>
+    <div class="btn-stack" style="padding-top:4px">
+      <button class="btn btn-purple" onclick="showScreen('s-solo-setup')">🎮 เล่นคนเดียว</button>
+      <button class="btn btn-ghost"  onclick="showScreen('s-host-setup')">👑 สร้างห้อง (Host)</button>
+      <button class="btn btn-ghost"  onclick="showScreen('s-join')">🔑 เข้าร่วมห้อง</button>
+    </div>
   </div>
 </div>
 
